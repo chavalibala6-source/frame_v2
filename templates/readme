@@ -1,0 +1,49 @@
+  Frame V2 – Local + Kubernetes Editor
+  =====================================
+  An edge-to-edge, media-savvy notepad built on Flask with optional video+image carousels, playlist support, local uploads, and
+  Redis-powered caching. Everything runs either via Docker Compose (for quick local dev) or Kubernetes (for scale/backups).
+  Images/videos persist under `/app/data/uploads`, and Redis caches documents to speed up repeated reads while maintaining
+  durability.
+
+  Running locally (Compose)
+  -------------------------
+  1. Build/start: `docker-compose up -d --build`
+  2. Visit `http://localhost:5001` or your DNS of choice.
+  3. Upload files, open tabs, or command the UI; Redis publishes `doc:*` keys with HTML payloads.
+  4. Inspect cache: `docker exec -it frame_v2-redis-1 redis-cli KEYS 'doc:*'` and `GET` or TTL the desired entry; persistence is
+  enabled via `./redis/redis.conf` (append-only + RDB) and mounts `./redis-data`.
+
+  Kubernetes deployment
+  ---------------------
+  1. Prepare resources:
+
+  kubectl apply -f k8s/redis-configmap.yaml
+  kubectl apply -f k8s/redis-pvc.yaml
+  kubectl apply -f k8s/redis-deployment.yaml
+  kubectl apply -f k8s/redis-service.yaml
+  kubectl apply -f k8s/deployment.yaml
+  kubectl apply -f k8s/frame-v2-service.yaml
+
+  2. Restart pods after changes (esp. Redis config) with `kubectl rollout restart deployment/redis` and `kubectl rollout restart
+  deployment/frame-v2`.
+  3. App endpoint `http://noteslook.shop` (or local kube ingress); `/cache-status` now lists `doc:*` keys with TTL/length, so you
+  can inspect cached content via HTTP (no CLI required).
+
+  Redis caching essentials
+  ------------------------
+  - Entry TTL = 3600 s (configurable via `REDIS_TTL` env var).
+  - Persistence: append-only file + RDB saves + PVC/redis-data ensure cached docs survive restarts.
+  - Memory cap: `maxmemory 512mb` + `volatile-lru` evicts the least-recently-used TTL’d entries when pressure hits the limit.
+  - Inspect cache: `/cache-status` returns JSON with each `doc:*` key, remaining TTL, and byte length; for raw content use `redis-
+  cli GET "doc:<name>"` inside the Redis pod/container.
+
+  Development tips
+  ----------------
+  - Add/modify docs via the UI; once cached, you can replay with `/cache-status`.
+  - When switching between Compose and Kubernetes, target the matching Redis instance (Compose: `docker exec frame_v2-redis-1 …`;
+  Kubernetes: `kubectl exec -it deployment/redis …`).
+  - To rebuild caches or change TTL/policies, edit `redis/redis.conf` or `k8s/redis-configmap.yaml`, then restart the Redis pod/
+  service (`kubectl rollout restart deployment/redis` or `docker-compose down && docker-compose up -d --build`).
+
+  That’s the current state—media-rich UI, persistent uploads, Redis caching/persistence/eviction, and the new `/cache-status`
+  helper. Let me know if you’d like the README written to disk or formatted differently.

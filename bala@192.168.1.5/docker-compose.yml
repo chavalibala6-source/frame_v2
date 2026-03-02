@@ -1,0 +1,38 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: notepad
+      POSTGRES_USER: notepad
+      POSTGRES_PASSWORD: notepad
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U notepad"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    ports:
+      - "5001:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./files:/app/files:ro
+      - ./data:/app/data
+    environment:
+      - FLASK_ENV=production
+      - DB_HOST=postgres
+      - DB_NAME=notepad
+      - DB_USER=notepad
+      - DB_PASSWORD=notepad
+    restart: always
+
+volumes:
+  postgres_data:

@@ -1,0 +1,1 @@
+./k8s-setup.sh && kubectl rollout restart deployment/frame-v2 && kubectl rollout status deployment/frame-v2

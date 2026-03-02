@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frame-v2
+  labels:
+    app: frame-v2
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: frame-v2
+  template:
+    metadata:
+      labels:
+        app: frame-v2
+    spec:
+      containers:
+      - name: frame-container
+        image: balu051989/frame_v2-web:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5000
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "250m"
+            memory: "256Mi"
+        volumeMounts:
+        - name: storage
+          mountPath: /app/data
+        env:
+        - name: DB_HOST
+          value: "postgres"
+        - name: DB_NAME
+          value: "notepad"
+        - name: DB_USER
+          value: "notepad"
+        - name: DB_PASSWORD
+          value: "notepad"
+      volumes:
+      - name: storage
+        persistentVolumeClaim:
+          claimName: frame-pvc
+      - name: nginx-config
+        configMap:
+          name: nginx-config
+      - name: ssl-certs
+        secret:
+          secretName: frame-ssl-secret

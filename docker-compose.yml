@@ -1,0 +1,72 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: notepad
+      POSTGRES_USER: notepad
+      POSTGRES_PASSWORD: notepad
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U notepad" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: always
+
+  ansible:
+    image: willhallonline/ansible:latest
+    container_name: ansible
+    volumes:
+      - ./ansible:/ansible
+      - ~/.ssh:/root/.ssh:ro
+    working_dir: /ansible
+    tty: true
+    restart: unless-stopped
+  web:
+    build: .
+    ports:
+      - "5001:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - ./files:/app/files:ro
+      - ./data:/app/data
+    environment:
+      - FLASK_ENV=production
+      - DB_HOST=postgres
+      - DB_NAME=notepad
+      - DB_USER=notepad
+      - DB_PASSWORD=notepad
+      - REDIS_HOST=redis
+      - REDIS_TTL=3600
+    restart: always
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    restart: always
+    volumes:
+      - ./redis-data:/data
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
+
+volumes:
+  postgres_data:
+  jenkins_home:
