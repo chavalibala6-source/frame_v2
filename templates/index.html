@@ -300,6 +300,7 @@
             --code-line: rgba(255, 255, 255, 0.08);
             --code-inline-bg: rgba(255, 255, 255, 0.08);
             --code-inline-border: rgba(255, 255, 255, 0.12);
+            --toolbar-icon-color: #f5f5f5;
         }
 
         /* Legacy Paper Colors */
@@ -456,7 +457,7 @@
             box-shadow: 0 2px 4px var(--btn-shadow);
             cursor: pointer;
             color: var(--btn-text);
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
             outline: none;
             display: flex;
             align-items: center;
@@ -482,19 +483,14 @@
             filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.18));
             transition: transform 0.18s ease, filter 0.18s ease, opacity 0.18s ease;
             opacity: 0.92;
+            color: var(--toolbar-icon-color, inherit);
+            fill: currentColor;
         }
 
         .toolbar button:hover,
         .toolbar select:hover,
         .toolbar input:hover {
-            transform: translateY(-1px);
             box-shadow: 0 4px 8px var(--btn-shadow);
-        }
-
-        .toolbar button:hover svg {
-            transform: scale(1.06);
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.22));
-            opacity: 1;
         }
 
         .toolbar button:active {
@@ -2243,12 +2239,13 @@
                     <i data-lucide="panel-bottom-close"></i>
                 </button>
                 <div class="toolbar-group">
-                    <button onclick="toggleTheme()" title="Theme Toggle"><i data-lucide="sun"></i></button>
+                    <button onclick="toggleTheme()" title="Theme Toggle"><i data-lucide="sun" id="themeToggleIcon"></i></button>
                 </div>
             </div>
         </div>
     </div>
 
+    <div class="mode-overlay" id="modeOverlay"></div>
     <div class="notepad">
         <div class="paper" id="paper">
             <div class="article" contenteditable="false" spellcheck="true"></div>
@@ -2944,11 +2941,33 @@
             setTimeout(() => status.textContent = "Ready", 2000);
         }
 
+        const themeToggleIcon = document.getElementById("themeToggleIcon");
+
+        function applyTheme(theme, { notify = true } = {}) {
+            const useDark = theme === "dark";
+            document.body.classList.toggle("dark-mode", useDark);
+            document.documentElement.dataset.theme = theme;
+            localStorage.setItem("theme", theme);
+
+            if (themeToggleIcon) {
+                themeToggleIcon.setAttribute("data-lucide", useDark ? "moon" : "sun");
+            }
+
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+
+            if (notify) {
+                status.textContent = useDark ? "Dark Mode Active" : "Light Mode Active";
+                setTimeout(() => status.textContent = "Ready", 2000);
+            } else {
+                status.textContent = "Ready";
+            }
+        }
+
         function toggleTheme() {
-            const isDark = document.body.classList.toggle('dark-mode');
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            status.textContent = isDark ? "Dark Mode Active" : "Light Mode Active";
-            setTimeout(() => status.textContent = "Ready", 2000);
+            const activeTheme = document.body.classList.contains("dark-mode") ? "light" : "dark";
+            applyTheme(activeTheme);
         }
 
         function toggleBg() {
@@ -4961,8 +4980,9 @@
         /* Init */
         window.onload = function () {
             // Restore Theme
-            if (localStorage.getItem('theme') === 'dark') {
-                document.body.classList.add('dark-mode');
+            const storedTheme = localStorage.getItem("theme");
+            if (storedTheme === "dark" || storedTheme === "light") {
+                applyTheme(storedTheme, { notify: false });
             }
 
             // Restore Background
