@@ -3354,7 +3354,7 @@
 
         function setupLocalVideoPreview(video) {
             if (!video) return;
-            video.removeAttribute("controls");
+            video.setAttribute("controls", "controls");
             video.setAttribute("preload", "metadata");
             const audioAllowed = localStorage.getItem('localVideoAudio') === 'true';
             video.muted = !audioAllowed;
