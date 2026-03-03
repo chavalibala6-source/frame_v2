@@ -17,6 +17,8 @@ app = Flask(__name__)
 # Store uploads on shared volume to work across replicas
 UPLOAD_DIR = os.path.join(app.root_path, "data", "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+FILE_UPLOAD_DIR = os.path.join(UPLOAD_DIR, "files")
+os.makedirs(FILE_UPLOAD_DIR, exist_ok=True)
 
 UPLOAD_ORIGIN = os.getenv("UPLOAD_ORIGIN", "https://noteslook.shop")
 
@@ -72,6 +74,22 @@ def init_db():
                     id INTEGER PRIMARY KEY CHECK (id = 1),
                     last_mod TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
+            """)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS music_tracks (
+                    id TEXT PRIMARY KEY,
+                    storage_name TEXT NOT NULL,
+                    original_name TEXT NOT NULL,
+                    url TEXT NOT NULL,
+                    download_url TEXT NOT NULL,
+                    size BIGINT NOT NULL,
+                    mime TEXT,
+                    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+            cur.execute("""
+                ALTER TABLE music_tracks
+                ADD COLUMN IF NOT EXISTS doc_name TEXT NOT NULL DEFAULT 'global'
             """)
             cur.execute("""
                 INSERT INTO sync_state (id, last_mod)
@@ -145,7 +163,7 @@ def uploaded_files(filename):
 
 @app.after_request
 def add_cors_headers(resp):
-    if request.path.startswith("/upload_video") or request.path.startswith("/upload_image"):
+    if request.path.startswith("/upload_video") or request.path.startswith("/upload_image") or request.path.startswith("/upload_file"):
         resp.headers["Access-Control-Allow-Origin"] = UPLOAD_ORIGIN
         resp.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
         resp.headers["Access-Control-Allow-Headers"] = "Content-Type"
@@ -298,6 +316,113 @@ def upload_image():
     if host == "noteslook.lan" and scheme == "https":
         host = "noteslook.lan:8443"
     return jsonify({"url": f"{scheme}://{host}/static/uploads/{unique_name}"})
+
+
+@app.route("/upload_file", methods=["POST", "OPTIONS"])
+def upload_file():
+    if request.method == "OPTIONS":
+        return ("", 204)
+
+    if "file" not in request.files:
+        return jsonify({"error": "No file provided"}), 400
+
+    file = request.files["file"]
+    if not file or file.filename == "":
+        return jsonify({"error": "Empty filename"}), 400
+
+    mimetype = (file.mimetype or "").lower()
+    if mimetype.startswith("image/") or mimetype.startswith("video/"):
+        return jsonify({"error": "Use the dedicated image/video uploader"}), 400
+
+    safe_name = secure_filename(file.filename)
+    ext = os.path.splitext(safe_name)[1].lower() or ""
+    track_id = uuid.uuid4().hex
+    storage_name = f"{track_id}{ext}"
+    dest_path = os.path.join(FILE_UPLOAD_DIR, storage_name)
+    file.save(dest_path)
+
+    size = os.path.getsize(dest_path)
+    host = request.host
+    scheme = request.headers.get("X-Forwarded-Proto", request.scheme)
+    if host == "noteslook.lan" and scheme == "https":
+        host = "noteslook.lan:8443"
+    download_endpoint = f"{scheme}://{host}/download_file/{storage_name}?name={secure_filename(safe_name)}"
+    public_url = f"{scheme}://{host}/static/uploads/files/{storage_name}"
+
+    doc_name = request.args.get("doc") or request.form.get("doc") or "global"
+
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                INSERT INTO music_tracks (
+                    id, storage_name, original_name, url, download_url, size, mime, doc_name
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                track_id, storage_name, safe_name, public_url, download_endpoint, size, mimetype, doc_name
+            ))
+            conn.commit()
+
+    return jsonify({
+        "id": track_id,
+        "url": public_url,
+        "download_url": download_endpoint,
+        "name": safe_name,
+        "size": size,
+        "mime": mimetype
+    })
+
+
+@app.route("/download_file/<path:filename>")
+def download_file(filename):
+    safe_name = request.args.get("name") or filename
+    safe_name = secure_filename(safe_name) or filename
+    return send_from_directory(FILE_UPLOAD_DIR, filename, as_attachment=True, download_name=safe_name)
+
+
+@app.route("/music_tracks")
+def list_music_tracks():
+    doc_name = request.args.get("doc") or "global"
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT id, original_name, url, download_url, size, mime, uploaded_at
+                FROM music_tracks
+                WHERE doc_name = %s
+                ORDER BY uploaded_at ASC
+            """, (doc_name,))
+            rows = cur.fetchall()
+    return jsonify([
+        {
+            "id": row[0],
+            "name": row[1],
+            "url": row[2],
+            "download_url": row[3],
+            "size": row[4],
+            "mime": row[5],
+            "uploaded_at": row[6].isoformat() if row[6] else None
+        }
+        for row in rows
+    ])
+
+
+@app.route("/music_tracks/<track_id>", methods=["DELETE"])
+def delete_music_track(track_id):
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT storage_name FROM music_tracks WHERE id=%s", (track_id,))
+            row = cur.fetchone()
+            if not row:
+                return jsonify({"status": "not found"}), 404
+            storage_name = row[0]
+            file_path = os.path.join(FILE_UPLOAD_DIR, storage_name)
+            if os.path.exists(file_path):
+                try:
+                    os.remove(file_path)
+                except OSError:
+                    pass
+            cur.execute("DELETE FROM music_tracks WHERE id=%s", (track_id,))
+        conn.commit()
+    return jsonify({"status": "deleted"})
 
 @app.route("/download_images", methods=["POST"])
 def download_images():
