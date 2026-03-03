@@ -128,7 +128,7 @@
 
 
 
-        
+
 
         /* ================================
    Apple Keynote Liquid Glass Toolbar
@@ -300,6 +300,7 @@
             --code-line: rgba(255, 255, 255, 0.08);
             --code-inline-bg: rgba(255, 255, 255, 0.08);
             --code-inline-border: rgba(255, 255, 255, 0.12);
+            --toolbar-icon-color: #f5f5f5;
         }
 
         /* Legacy Paper Colors */
@@ -360,12 +361,12 @@
                 inset 0 -12px 18px rgba(0, 0, 0, 0.2);
         }
 
-.tab {
-    cursor: pointer;
-border-radius: 16px;
-font-size: 14px;
-/* color: var(--toolbar-text); */
-color: rgba(251, 251, 251, 0.65);
+        .tab {
+            cursor: pointer;
+            border-radius: 16px;
+            font-size: 14px;
+            /* color: var(--toolbar-text); */
+            color: rgba(251, 251, 251, 0.65);
             padding: 8px 24px;
             cursor: pointer;
             background: rgba(139, 0, 0, 0.64);
@@ -377,11 +378,11 @@ color: rgba(251, 251, 251, 0.65);
             gap: 8px;
             /* color: var(--toolbar-text);*/
             color: rgba(0, 0, 0, 0.65);
-             /* Subtle red tint for inactive tabs */
+            /* Subtle red tint for inactive tabs */
         }
 
 
-.tab.active {
+        .tab.active {
             background: color(srgb 0.29 0.2074 0.2178 / 0.73);
             font-weight: bold;
             color: rgba(0, 0, 0, 0.85);
@@ -456,7 +457,7 @@ color: rgba(251, 251, 251, 0.65);
             box-shadow: 0 2px 4px var(--btn-shadow);
             cursor: pointer;
             color: var(--btn-text);
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
             outline: none;
             display: flex;
             align-items: center;
@@ -482,19 +483,14 @@ color: rgba(251, 251, 251, 0.65);
             filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.18));
             transition: transform 0.18s ease, filter 0.18s ease, opacity 0.18s ease;
             opacity: 0.92;
+            color: var(--toolbar-icon-color, inherit);
+            fill: currentColor;
         }
 
         .toolbar button:hover,
         .toolbar select:hover,
         .toolbar input:hover {
-            transform: translateY(-1px);
             box-shadow: 0 4px 8px var(--btn-shadow);
-        }
-
-        .toolbar button:hover svg {
-            transform: scale(1.06);
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.22));
-            opacity: 1;
         }
 
         .toolbar button:active {
@@ -787,328 +783,6 @@ color: rgba(251, 251, 251, 0.65);
             border-radius: 4px;
         }
 
-        .music-section {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            margin: 40px 0 60px;
-            padding: 0 10px;
-        }
-
-        .music-heading {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 18px;
-            padding: 0 10px;
-        }
-
-        .music-heading h2 {
-margin: 0;
-font-size: 20px;
-letter-spacing: 0.01em;
-color: chocolate;
-padding: 50px 20px 20px 0px;
-}
-
-        .music-subtext {
-            font-size: 12px;
-            letter-spacing: 0.01em;
-            color: rgba(0, 0, 0, 0.6);
-        }
-
-        .music-controls {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .music-controls button {
-            border: none;
-            border-radius: 999px;
-            padding: 6px 12px;
-            background: rgba(255, 255, 255, 0.4);
-            color: #111;
-            font-weight: 600;
-            cursor: pointer;
-            backdrop-filter: blur(8px);
-            transition: background 0.2s ease, transform 0.2s ease;
-        }
-
-        .music-controls button:hover {
-            background: rgba(255, 255, 255, 0.65);
-            transform: translateY(-1px);
-        }
-
-        .music-row {
-            display: flex;
-            gap: 18px;
-            overflow-x: auto;
-            padding: 12px;
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .music-row {
-            display: flex;
-            gap: 18px;
-            overflow-x: auto;
-            padding: 12px;
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .music-row::-webkit-scrollbar {
-            height: 6px;
-        }
-
-        .music-row::-webkit-scrollbar-thumb {
-            background: rgba(0, 0, 0, 0.25);
-            border-radius: 999px;
-        }
-
-        .music-card {
-            position: relative;
-            min-width: 240px;
-            max-width: 280px;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(240, 240, 240, 1));
-            border-radius: 24px;
-            padding: 18px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.65), 0 30px 80px rgba(0, 0, 0, 0.25);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .music-card.is-playing {
-            transform: scale(1.04);
-            box-shadow: inset 0 4px 12px rgba(255, 255, 255, 0.9), 0 45px 100px rgba(0, 0, 0, 0.4);
-        }
-
-        .music-card:hover {
-            transform: scale(1.03);
-        }
-
-        .music-select {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            display: none;
-            align-items: center;
-            gap: 4px;
-            padding: 4px 10px;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.9);
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 0.01em;
-        }
-
-        .music-row.select-mode .music-select {
-            display: inline-flex;
-        }
-
-        .music-art {
-            width: 64px;
-            height: 64px;
-            border-radius: 18px;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(220, 220, 230, 0.9));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            color: #333;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-        }
-
-        .music-meta {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .music-title {
-  font-weight: 600;
-  font-size: 15px;
-  letter-spacing: 0.01em;
-  color: #111;
-  line-height: 1.3;
-
-  max-height: 50px;   /* set height */
-  overflow-y: auto;   /* enables vertical scroll */
-  /* Hide scrollbar - Chrome, Safari */
-  scrollbar-width: none;          /* Firefox */
-  -ms-overflow-style: none;       /* IE/Edge */
-}
-.music-title::-webkit-scrollbar {
-  display: none;                  /* Chrome, Safari */
-}
-
-        .music-size {
-            font-size: 13px;
-            color: rgba(0, 0, 0, 0.6);
-        }
-
-        .music-play-btn {
-            width: 100%;
-            border: none;
-            border-radius: 18px;
-            padding: 8px 12px;
-            font-size: 14px;
-            font-weight: 600;
-            background: rgba(255, 255, 255, 0.85);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .music-play-btn:hover {
-            background: rgba(255, 255, 255, 1);
-        }
-
-        body.dark-mode .music-section {
-            background: rgba(0, 0, 0, 0.25);
-        }
-
-        body.dark-mode .music-controls button {
-            background: rgba(255, 255, 255, 0.08);
-            color: #fff;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        body.dark-mode .music-heading h2 {
-            color: chocolate;
-            padding: 50px 20px 20px 0;
-        }
-
-        body.dark-mode .music-row {
-            padding: 12px 0;
-        }
-
-        body.dark-mode .music-card {
-            background: linear-gradient(180deg, rgba(30, 30, 30, 0.9), rgba(12, 12, 12, 0.95));
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: inset 0 4px 10px rgba(255, 255, 255, 0.05), 0 35px 80px rgba(0, 0, 0, 0.65);
-        }
-
-        body.dark-mode .music-card.is-playing {
-            box-shadow: inset 0 4px 12px rgba(255, 255, 255, 0.08), 0 45px 100px rgba(0, 0, 0, 0.8);
-        }
-
-        body.dark-mode .music-title,
-        body.dark-mode .music-size,
-        body.dark-mode .music-progress-time,
-        body.dark-mode .music-download-status {
-            color: rgba(255, 255, 255, 0.85);
-        }
-
-        body.dark-mode .music-play-btn {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: #fff;
-        }
-
-        body.dark-mode .music-progress-track {
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        body.dark-mode .music-global-progress-track {
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        body.dark-mode .music-global-progress-label {
-            color: rgba(255, 255, 255, 0.65);
-        }
-
-        .music-progress-track {
-            position: relative;
-            height: 10px;
-            border-radius: 10px;
-            background: rgba(0, 0, 0, 0.1);
-            cursor: pointer;
-        }
-
-        .music-progress-fill {
-            position: absolute;
-            inset: 0;
-            width: 0;
-            border-radius: 10px;
-            background: linear-gradient(90deg, #1c92d2, #f2fcfe);
-            transition: width 0.1s linear;
-        }
-
-        .music-progress-time {
-            margin-top: 4px;
-            font-size: 12px;
-            color: rgba(0, 0, 0, 0.45);
-        }
-
-        .music-actions {
-            display: flex;
-            gap: 12px;
-        }
-
-        .music-actions button {
-            flex: 1;
-            border: none;
-            border-radius: 16px;
-            background: rgba(255, 255, 255, 0.85);
-            padding: 8px 10px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
-
-        .music-download-status {
-            font-size: 12px;
-            color: rgba(0, 0, 0, 0.6);
-            text-align: center;
-            min-height: 16px;
-        }
-
-        .music-global-progress {
-            width: 100%;
-            padding: 0 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .music-global-progress-track {
-            flex: 1;
-            height: 6px;
-            border-radius: 3px;
-            background: rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        .music-global-progress-fill {
-            height: 100%;
-            width: 0;
-            background: linear-gradient(90deg, #0ea5e9, #38bdf8);
-            transition: width 0.2s ease;
-        }
-
-        .music-global-progress-label {
-            font-size: 12px;
-            font-weight: 600;
-            color: rgba(0, 0, 0, 0.6);
-            min-width: 60px;
-            text-align: right;
-        }
-
-        .music-card audio {
-            display: none;
-        }
-
         .modal-header {
             display: flex;
             justify-content: space-between;
@@ -1347,7 +1021,7 @@ padding: 50px 20px 20px 0px;
             border-radius: 16px !important;
         }
 
-        
+
 
         /* =====================================================
    TOOLBAR (SINGLE LINE, FLOATING)
@@ -1512,14 +1186,6 @@ padding: 50px 20px 20px 0px;
             transition: transform 0.25s ease;
         }
 
-        .file-controls {
-            background: rgba(3, 2, 2, 0.34);
-        }
-
-        .file-row {
-            padding: 30px;
-        }
-
         .video-row.is-scrolling .video-card,
         .local-video-row.is-scrolling .video-card {
             transform: translateY(-4px);
@@ -1534,6 +1200,675 @@ padding: 50px 20px 20px 0px;
         .video-row::-webkit-scrollbar,
         .local-video-row::-webkit-scrollbar {
             display: none;
+        }
+
+        .file-carousel-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 12px 0 16px 0;
+            margin: 140px 0 12px 0;
+            position: relative;
+        }
+
+        .file-row {
+            display: flex;
+            gap: 16px;
+            padding: 10px 20px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .file-controls {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin: 0 auto;
+            width: 420px;
+            padding: 10px 22px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(18px);
+        }
+
+        .file-controls button {
+            border: none;
+            background: rgba(255, 255, 255, 0.22);
+            color: #fff;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .file-controls button:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .file-dots {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .file-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.4);
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+
+        .file-dot.active {
+            background: #fff;
+            transform: scale(1.3);
+        }
+
+        .file-row::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .file-card {
+            min-width: 260px;
+            max-width: 320px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(225, 225, 235, 0.95));
+            border-radius: 28px;
+            padding: 18px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 30px 65px rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: transform 0.35s ease, box-shadow 0.35s ease;
+        }
+
+        .file-card.is-center {
+            transform: scale(1.07);
+            box-shadow: inset 0 4px 12px rgba(255, 255, 255, 0.9), 0 45px 90px rgba(0, 0, 0, 0.45);
+            z-index: 3;
+        }
+
+        .file-card:hover {
+            transform: scale(1.06);
+            box-shadow: inset 0 3px 8px rgba(255, 255, 255, 0.9), 0 40px 75px rgba(0, 0, 0, 0.4);
+            z-index: 5;
+        }
+
+
+        .file-card .file-art {
+            width: 92px;
+            height: 92px;
+            border-radius: 24px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(230, 230, 240, 0.9));
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 6px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 6px;
+            font-weight: 700;
+            color: #1f1f1f;
+            font-size: 20px;
+            transition: transform 0.35s ease, box-shadow 0.35s ease;
+        }
+
+        .file-card .file-art i {
+            font-size: 30px;
+            color: #333;
+        }
+
+        .file-card .file-icon {
+            display: none;
+        }
+
+        .file-card .file-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-height: 54px;
+        }
+
+        .file-card .file-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .file-card .file-actions button,
+        .file-card .file-actions a {
+            flex: 1;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 6px;
+            font-weight: 600;
+            color: #222;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .file-card .file-preview {
+            margin-top: 6px;
+        }
+
+        .file-card .file-preview audio {
+            width: 100%;
+            border-radius: 12px;
+            background: #f8f8f8;
+        }
+
+        .file-card .file-progress {
+            height: 6px;
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .file-card .file-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00b894, #55efc4);
+            width: 0%;
+            transition: width 0.2s ease;
+        }
+
+        .file-card.uploading {
+            opacity: 0.85;
+        }
+
+        .music-section {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin: 40px 0 60px;
+            padding: 0 10px;
+        }
+
+        .music-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 18px;
+            padding: 0 10px;
+        }
+
+        .music-heading h2 {
+            margin: 0;
+            font-size: 20px;
+            letter-spacing: 0.01em;
+        }
+
+        .music-subtext {
+            font-size: 12px;
+            letter-spacing: 0.01em;
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .music-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .music-controls button {
+            border: none;
+            border-radius: 999px;
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.4);
+            color: #111;
+            font-weight: 600;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .music-controls button:hover {
+            background: rgba(255, 255, 255, 0.65);
+            transform: translateY(-1px);
+        }
+
+        .music-row {
+            display: flex;
+            gap: 18px;
+            overflow-x: auto;
+            padding: 12px;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .music-row::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .music-row::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 999px;
+        }
+
+        .music-card {
+            position: relative;
+            min-width: 240px;
+            max-width: 280px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(240, 240, 240, 1));
+            border-radius: 24px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.65), 0 30px 80px rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .music-card.is-playing {
+            transform: scale(1.04);
+            box-shadow: inset 0 4px 12px rgba(255, 255, 255, 0.9), 0 45px 100px rgba(0, 0, 0, 0.4);
+        }
+
+        .music-card:hover {
+            transform: scale(1.03);
+        }
+
+        .music-select {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: none;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+        }
+
+        .music-row.select-mode .music-select {
+            display: inline-flex;
+        }
+
+        .music-art {
+            width: 64px;
+            height: 64px;
+            border-radius: 18px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(220, 220, 230, 0.9));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: #333;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .music-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .music-title {
+            font-weight: 600;
+            font-size: 15px;
+            letter-spacing: 0.01em;
+            color: #111;
+            line-height: 1.3;
+        }
+
+        .music-size {
+            font-size: 13px;
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .music-play-btn {
+            width: 100%;
+            border: none;
+            border-radius: 18px;
+            padding: 8px 12px;
+            font-size: 14px;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.85);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .music-play-btn:hover {
+            background: rgba(255, 255, 255, 1);
+        }
+
+        .music-progress-track {
+            position: relative;
+            height: 10px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+
+        .music-progress-fill {
+            position: absolute;
+            inset: 0;
+            width: 0;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #1c92d2, #f2fcfe);
+            transition: width 0.1s linear;
+        }
+
+        .music-progress-time {
+            margin-top: 4px;
+            font-size: 12px;
+            color: rgba(0, 0, 0, 0.45);
+        }
+
+        .music-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .music-actions button {
+            flex: 1;
+            border: none;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.85);
+            padding: 8px 10px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .music-download-status {
+            font-size: 12px;
+            color: rgba(0, 0, 0, 0.6);
+            text-align: center;
+            min-height: 16px;
+        }
+
+        .music-global-progress {
+            width: 100%;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .music-global-progress-track {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .music-global-progress-fill {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, #0ea5e9, #38bdf8);
+            transition: width 0.2s ease;
+        }
+
+        .music-global-progress-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: rgba(0, 0, 0, 0.6);
+            min-width: 60px;
+            text-align: right;
+        }
+
+        .music-section {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin: 40px 0 60px;
+            padding: 0 10px;
+        }
+
+        .music-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 18px;
+            padding: 0 10px;
+        }
+
+        .music-heading h2 {
+            margin: 0;
+            font-size: 20px;
+            letter-spacing: 0.01em;
+        }
+
+        .music-subtext {
+            font-size: 12px;
+            letter-spacing: 0.01em;
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .music-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .music-controls button {
+            border: none;
+            border-radius: 999px;
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.4);
+            color: #111;
+            font-weight: 600;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .music-controls button:hover {
+            background: rgba(255, 255, 255, 0.65);
+            transform: translateY(-1px);
+        }
+
+        .music-row {
+            display: flex;
+            gap: 18px;
+            overflow-x: auto;
+            padding: 12px;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .music-row::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .music-row::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 999px;
+        }
+
+        .music-card {
+            position: relative;
+            min-width: 240px;
+            max-width: 280px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(240, 240, 240, 1));
+            border-radius: 24px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.65), 0 30px 80px rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .music-card.is-playing {
+            transform: scale(1.04);
+            box-shadow: inset 0 4px 12px rgba(255, 255, 255, 0.9), 0 45px 100px rgba(0, 0, 0, 0.4);
+        }
+
+        .music-card:hover {
+            transform: scale(1.03);
+        }
+
+        .music-select {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: none;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+        }
+
+        .music-row.select-mode .music-select {
+            display: inline-flex;
+        }
+
+        .music-art {
+            width: 64px;
+            height: 64px;
+            border-radius: 18px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(220, 220, 230, 0.9));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: #333;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .music-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .music-title {
+            font-weight: 600;
+            font-size: 15px;
+            letter-spacing: 0.01em;
+            color: #111;
+            line-height: 1.3;
+        }
+
+        .music-size {
+            font-size: 13px;
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .music-play-btn {
+            width: 100%;
+            border: none;
+            border-radius: 18px;
+            padding: 8px 12px;
+            font-size: 14px;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.85);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background 0.2s ease;
+        }
+
+        .music-play-btn:hover {
+            background: rgba(255, 255, 255, 1);
+        }
+
+        .music-progress-track {
+            position: relative;
+            height: 10px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+
+        .music-progress-fill {
+            position: absolute;
+            inset: 0;
+            width: 0;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #1c92d2, #f2fcfe);
+            transition: width 0.1s linear;
+        }
+
+        .music-progress-time {
+            margin-top: 4px;
+            font-size: 12px;
+            color: rgba(0, 0, 0, 0.45);
+        }
+
+        .music-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .music-actions button {
+            flex: 1;
+            border: none;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.85);
+            padding: 8px 10px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .music-download-status {
+            font-size: 12px;
+            color: rgba(0, 0, 0, 0.6);
+            text-align: center;
+            min-height: 16px;
+        }
+
+        .music-global-progress {
+            width: 100%;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .music-global-progress-track {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .music-global-progress-fill {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, #0ea5e9, #38bdf8);
+            transition: width 0.2s ease;
+        }
+
+        .music-global-progress-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: rgba(0, 0, 0, 0.6);
+            min-width: 60px;
+            text-align: right;
         }
 
         /* =====================================================
@@ -2527,81 +2862,60 @@ padding: 50px 20px 20px 0px;
             <div class="glass-backdrop"></div>
             <div class="glass-neutralizer"></div>
             <div class="toolbar-content">
-            <div class="toolbar-group">
-                <button onclick="newDoc()" title="New Document"><i data-lucide="plus"></i></button>
-                <button onclick="openServerList()" title="Open from Server"><i data-lucide="folder-open"></i></button>
-                <button onclick="saveServer()" title="Save to Server"><i data-lucide="save"></i></button>
-                <button onclick="downloadDoc()" title="Download as HTML"><i data-lucide="download"></i></button>
-                <button onclick="renameDoc()" title="Rename Content"><i data-lucide="type"></i></button>
-            </div>
+                <div class="toolbar-group">
+                    <button onclick="newDoc()" title="New Document"><i data-lucide="plus"></i></button>
+                    <button onclick="openServerList()" title="Open from Server"><i
+                            data-lucide="folder-open"></i></button>
+                    <button onclick="saveServer()" title="Save to Server"><i data-lucide="save"></i></button>
+                    <button onclick="downloadDoc()" title="Download as HTML"><i data-lucide="download"></i></button>
+                    <button onclick="renameDoc()" title="Rename Content"><i data-lucide="type"></i></button>
+                </div>
 
-            <div class="toolbar-divider"></div>
+                <div class="toolbar-divider"></div>
 
-            <div class="toolbar-group">
-                <button onclick="cmd('bold')" title="Bold"><i data-lucide="bold"></i></button>
-                <button onclick="cmd('italic')" title="Italic"><i data-lucide="italic"></i></button>
-                <button onclick="cmd('underline')" title="Underline"><i data-lucide="underline"></i></button>
-                <select onchange="heading(this.value)" title="Heading Style">
-                    <option value="">T</option>
-                    <option value="h1">H1</option>
-                    <option value="h2">H2</option>
-                    <option value="h3">H3</option>
-                </select>
-                <button onclick="cmd('justifyLeft')" title="Align Left"><i data-lucide="align-left"></i></button>
-                <button onclick="cmd('justifyCenter')" title="Align Center"><i data-lucide="align-center"></i></button>
-                <button onclick="cmd('justifyRight')" title="Align Right"><i data-lucide="align-right"></i></button>
-                <button onclick="cmd('formatBlock', 'pre')" title="Code Block"><i data-lucide="code"></i></button>
-                <button onclick="cmd('formatBlock', 'p')" title="Paragraph">
-                    <i data-lucide="type"></i>
+                <div class="toolbar-group">
+                    <button onclick="cmd('bold')" title="Bold"><i data-lucide="bold"></i></button>
+                    <button onclick="cmd('italic')" title="Italic"><i data-lucide="italic"></i></button>
+                    <button onclick="cmd('underline')" title="Underline"><i data-lucide="underline"></i></button>
+                    <select onchange="heading(this.value)" title="Heading Style">
+                        <option value="">T</option>
+                        <option value="h1">H1</option>
+                        <option value="h2">H2</option>
+                        <option value="h3">H3</option>
+                    </select>
+                    <button onclick="cmd('justifyLeft')" title="Align Left"><i data-lucide="align-left"></i></button>
+                    <button onclick="cmd('justifyCenter')" title="Align Center"><i
+                            data-lucide="align-center"></i></button>
+                    <button onclick="cmd('justifyRight')" title="Align Right"><i data-lucide="align-right"></i></button>
+                    <button onclick="cmd('formatBlock', 'pre')" title="Code Block"><i data-lucide="code"></i></button>
+                    <button onclick="cmd('formatBlock', 'p')" title="Paragraph">
+                        <i data-lucide="type"></i>
+                    </button>
+
+                </div>
+
+                <div class="toolbar-divider"></div>
+
+                <div class="toolbar-group">
+                    <input id="findTxt" placeholder="Find" style="width: 60px;">
+                    <input id="replaceTxt" placeholder="Rep" style="width: 60px;">
+                    <button onclick="find()" title="Find"><i data-lucide="search"></i></button>
+                    <button onclick="replace()" title="Replace"><i data-lucide="refresh-cw"></i></button>
+                </div>
+
+                <div class="toolbar-divider"></div>
+                <button id="toggleButton" title="Hide Toolbar">
+                    <i data-lucide="panel-bottom-close"></i>
                 </button>
-
-            </div>
-
-            <div class="toolbar-divider"></div>
-
-            <div class="toolbar-group">
-                <input id="findTxt" placeholder="Find" style="width: 60px;">
-                <input id="replaceTxt" placeholder="Rep" style="width: 60px;">
-                <button onclick="find()" title="Find"><i data-lucide="search"></i></button>
-                <button onclick="replace()" title="Replace"><i data-lucide="refresh-cw"></i></button>
-            </div>
-
-            <div class="toolbar-divider"></div>
-            <button id="toggleButton" title="Hide Toolbar">
-                <i data-lucide="panel-bottom-close"></i>
-            </button>
-            <div class="toolbar-group">
-                <button onclick="toggleTheme()" title="Theme Toggle"><i data-lucide="sun"></i></button>
-            </div>
+                <div class="toolbar-group">
+                    <button onclick="toggleTheme()" title="Theme Toggle"><i data-lucide="sun" id="themeToggleIcon"></i></button>
+                </div>
             </div>
         </div>
     </div>
 
+    <div class="mode-overlay" id="modeOverlay"></div>
     <div class="notepad">
-        <div class="music-section" id="musicSection" hidden>
-            <div class="music-heading">
-                <h2>Music Library</h2>
-                <span class="music-subtext" id="musicLibraryStatus">Upload a music file to preview it here</span>
-            </div>
-            <div class="music-controls">
-                <button id="musicUploadBtn">Upload Music</button>
-                <button id="musicSelectModeBtn">Select</button>
-                <button id="musicSelectAllBtn">Select All</button>
-                <button id="musicInvertSelectionBtn">Invert Selection</button>
-                <button id="musicDeleteSelectedBtn">Delete Selected</button>
-                <button id="musicDeleteAllBtn">Delete All</button>
-                <button id="musicDownloadSelectedBtn">Download Selected</button>
-                <button id="musicDownloadAllBtn">Download All</button>
-            </div>
-            <input type="file" id="musicUploadInput" accept="audio/*" multiple style="display:none;">
-            <div class="music-row" id="musicRow"></div>
-            <div class="music-global-progress">
-                <div class="music-global-progress-track">
-                    <div class="music-global-progress-fill" id="musicProgressFill"></div>
-                </div>
-                <div class="music-global-progress-label" id="musicProgressLabel">0 / 0</div>
-            </div>
-        </div>
         <div class="paper" id="paper">
             <div class="article" contenteditable="false" spellcheck="true"></div>
         </div>
@@ -2624,41 +2938,48 @@ padding: 50px 20px 20px 0px;
                 <div class="toolbar-content">
 
 
-                <div class="toolbar-group">
+                    <div class="toolbar-group">
 
-                    <button onclick="insertImage()" title="Insert Image"><i data-lucide="image"></i></button>
-                    <button onclick="insertVideo()" title="Insert YouTube Video"><i data-lucide="video"></i></button>
-                    <button onclick="insertLocalVideo()" title="Upload Video"><i data-lucide="upload"></i></button>
-                    <button onclick="refreshDoc()" title="Refresh Document" id="refreshBtn">
-                        <i data-lucide="refresh-cw"></i>
-                    </button>
+                        <button onclick="insertImage()" title="Insert Image"><i data-lucide="image"></i></button>
+                        <button onclick="insertVideo()" title="Insert YouTube Video"><i
+                                data-lucide="video"></i></button>
+                        <button onclick="insertLocalVideo()" title="Upload Video"><i data-lucide="upload"></i></button>
+                        <button onclick="triggerFileUpload()" title="Upload File"><i data-lucide="file"></i></button>
+                        <button onclick="refreshDoc()" title="Refresh Document" id="refreshBtn">
+                            <i data-lucide="refresh-cw"></i>
+                        </button>
 
-                </div>
+                    </div>
 
 
-                <div class="toolbar-divider"></div>
+                    <div class="toolbar-divider"></div>
 
-                <div class="toolbar-group">
-                    <button onclick="cmd('insertUnorderedList')" title="Bullet List"><i data-lucide="list"></i></button>
-                    <button onclick="cmd('insertOrderedList')" title="Numbered List"><i
-                            data-lucide="list-ordered"></i></button>
-                    <button onclick="insertGroup()" title="Collapsible Section"><i data-lucide="layers"></i></button>
-                    <button onclick="cmd('insertHorizontalRule')" title="Horizontal Line"><i
-                            data-lucide="minus"></i></button>
+                    <div class="toolbar-group">
+                        <button onclick="cmd('insertUnorderedList')" title="Bullet List"><i
+                                data-lucide="list"></i></button>
+                        <button onclick="cmd('insertOrderedList')" title="Numbered List"><i
+                                data-lucide="list-ordered"></i></button>
+                        <button onclick="insertGroup()" title="Collapsible Section"><i
+                                data-lucide="layers"></i></button>
+                        <button onclick="cmd('insertHorizontalRule')" title="Horizontal Line"><i
+                                data-lucide="minus"></i></button>
 
-                </div>
+                    </div>
 
-                <div class="toolbar-divider"></div>
+                    <div class="toolbar-divider"></div>
 
-                <div class="toolbar-group">
-                    <input type="color" onchange="setColor(this.value)" title="Text Color" style="width:32px; height:32px;">
-                    <button onclick="highlight()" title="Highlight Text"><i data-lucide="highlighter"></i></button>
-                    <button onclick="toggleMarkdown()" title="Markdown Mode"><i data-lucide="file-text"></i></button>
+                    <div class="toolbar-group">
+                        <input type="color" onchange="setColor(this.value)" title="Text Color"
+                            style="width:32px; height:32px;">
+                        <button onclick="highlight()" title="Highlight Text"><i data-lucide="highlighter"></i></button>
+                        <button onclick="toggleMarkdown()" title="Markdown Mode"><i
+                                data-lucide="file-text"></i></button>
 
-                </div>
+                    </div>
 
-                <input type="file" id="imgInput" style="display: none;" accept="image/*" multiple>
-                <input type="file" id="videoInput" style="display: none;" accept="video/*" multiple>
+                    <input type="file" id="imgInput" style="display: none;" accept="image/*" multiple>
+                    <input type="file" id="videoInput" style="display: none;" accept="video/*" multiple>
+                    <input type="file" id="genericFileInput" style="display: none;" multiple>
                 </div>
             </div>
         </div>
@@ -2761,7 +3082,7 @@ padding: 50px 20px 20px 0px;
                 const span = document.createElement("span");
                 span.textContent = "Doc 1";
                 t.appendChild(span);
-                t.onclick = () => {};
+                t.onclick = () => { };
                 tabs.appendChild(t);
                 shownDefault = true;
             }
@@ -2809,7 +3130,6 @@ padding: 50px 20px 20px 0px;
                     article.innerHTML = "";
                     article.contentEditable = "false";
                     renderTabs();
-                    loadMusicForDoc("global");
                 }
             } else {
                 renderTabs();
@@ -2903,13 +3223,14 @@ padding: 50px 20px 20px 0px;
 
                 // FIX: Extract Image/Video Rows if loaded inside article
                 const embeddedImageRow = article.querySelector('.image-row');
-                const embeddedRow = article.querySelector('.video-row');
+                const embeddedRow = article.querySelector('.video-row[data-carousel="youtube"]');
                 const embeddedLocalRow = article.querySelector('.local-video-row');
+                const embeddedFileRow = article.querySelector('.file-row');
 
                 // Cleanup: Remove ANY existing image/video rows/containers from notepad before placing new one
                 const existingCarousels = document.querySelectorAll('.notepad > .video-carousel-container');
                 existingCarousels.forEach(c => c.remove());
-                const existingRows = document.querySelectorAll('.notepad > .video-row');
+                const existingRows = document.querySelectorAll('.notepad > .video-row[data-carousel="youtube"]');
                 existingRows.forEach(r => r.remove());
                 const existingLocalCarousels = document.querySelectorAll('.notepad > .local-video-carousel-container');
                 existingLocalCarousels.forEach(c => c.remove());
@@ -2919,6 +3240,10 @@ padding: 50px 20px 20px 0px;
                 existingImageCarousels.forEach(c => c.remove());
                 const existingImageRows = document.querySelectorAll('.notepad > .image-row');
                 existingImageRows.forEach(r => r.remove());
+                const existingFileCarousels = document.querySelectorAll('.notepad > .file-carousel-container');
+                existingFileCarousels.forEach(c => c.remove());
+                const existingFileRows = document.querySelectorAll('.notepad > .file-row');
+                existingFileRows.forEach(r => r.remove());
 
                 if (embeddedImageRow) {
                     const notepad = document.querySelector('.notepad');
@@ -3042,16 +3367,18 @@ padding: 50px 20px 20px 0px;
                     });
 
                     // Move any local <video> containers out of YouTube row into local row
-                    const localRow = document.querySelector('.local-video-row') || getOrCreateLocalVideoCarousel();
                     const localMoves = [];
                     videos.forEach(v => {
                         if (v.querySelector('video')) {
                             localMoves.push(v);
                         }
                     });
-                    localMoves.forEach(v => {
-                        localRow.appendChild(v);
-                    });
+                    if (localMoves.length > 0) {
+                        const localRow = document.querySelector('.local-video-row') || getOrCreateLocalVideoCarousel();
+                        localMoves.forEach(v => {
+                            localRow.appendChild(v);
+                        });
+                    }
                     if (localMoves.length) {
                         // keep local videos separate; no local controls UI
                     }
@@ -3059,6 +3386,15 @@ padding: 50px 20px 20px 0px;
                     // If no YouTube iframes remain, remove the YouTube carousel
                     if (!embeddedRow.querySelector('iframe')) {
                         carouselContainer.remove();
+                    }
+
+                    // If no local videos remain, remove the local carousel
+                    const existingLocalCarousel = document.querySelector('.local-video-carousel-container');
+                    if (existingLocalCarousel) {
+                        const localRow = existingLocalCarousel.querySelector('.local-video-row');
+                        if (!localRow || !localRow.querySelector('video')) {
+                            existingLocalCarousel.remove();
+                        }
                     }
 
                     // Ensure local videos are preview-only and have download button
@@ -3130,31 +3466,50 @@ padding: 50px 20px 20px 0px;
                     }
 
                     // Ensure local videos have controls
-                    embeddedLocalRow.querySelectorAll('.video-container').forEach(v => {
-                        const localVideo = v.querySelector('video');
-                        if (!localVideo) return;
-                        setupLocalVideoPreview(localVideo);
-                        if (!v.querySelector('.video-download')) {
-                            const src = localVideo.getAttribute('src') || '';
-                            const btn = document.createElement('a');
-                            btn.className = 'video-download';
-                            btn.href = src;
-                            btn.download = '';
-                            btn.textContent = 'Download';
-                            v.querySelector('.video-card')?.appendChild(btn);
-                        }
-                        if (!v.querySelector('.video-audio-toggle')) {
-                            const audio = document.createElement('button');
-                            audio.className = 'video-audio-toggle';
-                            audio.innerHTML = '<i data-lucide="volume-2"></i>';
-                            audio.onclick = () => toggleLocalVideoAudio(audio);
-                            v.querySelector('.video-card')?.appendChild(audio);
-                        }
-                    });
+                    const localVideos = Array.from(embeddedLocalRow.querySelectorAll('.video-container'));
+                    if (localVideos.length === 0) {
+                        // Empty recovered row, just remove it
+                        localContainer.remove();
+                    } else {
+                        localVideos.forEach(v => {
+                            const localVideo = v.querySelector('video');
+                            if (!localVideo) return;
+                            setupLocalVideoPreview(localVideo);
+                            if (!v.querySelector('.video-download')) {
+                                const src = localVideo.getAttribute('src') || '';
+                                const btn = document.createElement('a');
+                                btn.className = 'video-download';
+                                btn.href = src;
+                                btn.download = '';
+                                btn.textContent = 'Download';
+                                v.querySelector('.video-card')?.appendChild(btn);
+                            }
+                            if (!v.querySelector('.video-audio-toggle')) {
+                                const audio = document.createElement('button');
+                                audio.className = 'video-audio-toggle';
+                                audio.innerHTML = '<i data-lucide="volume-2"></i>';
+                                audio.onclick = () => toggleLocalVideoAudio(audio);
+                                v.querySelector('.video-card')?.appendChild(audio);
+                            }
+                        });
 
-                    renderLocalIndicators();
-                    lucide.createIcons();
-                    rewriteLocalUrlsInDom(localContainer);
+                        renderLocalIndicators();
+                        lucide.createIcons();
+                        rewriteLocalUrlsInDom(localContainer);
+                    }
+                }
+
+                if (embeddedFileRow) {
+                    const notepad = document.querySelector('.notepad');
+                    let fileContainer = document.querySelector('.file-carousel-container');
+                    if (!fileContainer) {
+                        fileContainer = document.createElement('div');
+                        fileContainer.className = 'file-carousel-container';
+                    }
+                    ensureFileControls(fileContainer, embeddedFileRow);
+                    fileContainer.appendChild(embeddedFileRow);
+                    notepad.insertBefore(fileContainer, notepad.firstChild);
+                    ensureFileControls(fileContainer, embeddedFileRow);
                 }
 
                 // FIX: Legacy nesting (article inside article)
@@ -3184,7 +3539,7 @@ padding: 50px 20px 20px 0px;
                 article.contentEditable = "true";
                 status.textContent = `Opened: ${name}`;
                 setTimeout(() => status.textContent = "Ready", 2000);
-                loadMusicForDoc(name);
+                bindVideoUploader();
                 return (docs[name] || "").length;
             } catch (e) {
                 console.error("Load error:", e);
@@ -3276,11 +3631,33 @@ padding: 50px 20px 20px 0px;
             setTimeout(() => status.textContent = "Ready", 2000);
         }
 
+        const themeToggleIcon = document.getElementById("themeToggleIcon");
+
+        function applyTheme(theme, { notify = true } = {}) {
+            const useDark = theme === "dark";
+            document.body.classList.toggle("dark-mode", useDark);
+            document.documentElement.dataset.theme = theme;
+            localStorage.setItem("theme", theme);
+
+            if (themeToggleIcon) {
+                themeToggleIcon.setAttribute("data-lucide", useDark ? "moon" : "sun");
+            }
+
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+
+            if (notify) {
+                status.textContent = useDark ? "Dark Mode Active" : "Light Mode Active";
+                setTimeout(() => status.textContent = "Ready", 2000);
+            } else {
+                status.textContent = "Ready";
+            }
+        }
+
         function toggleTheme() {
-            const isDark = document.body.classList.toggle('dark-mode');
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            status.textContent = isDark ? "Dark Mode Active" : "Light Mode Active";
-            setTimeout(() => status.textContent = "Ready", 2000);
+            const activeTheme = document.body.classList.contains("dark-mode") ? "light" : "dark";
+            applyTheme(activeTheme);
         }
 
         function toggleBg() {
@@ -3303,7 +3680,7 @@ padding: 50px 20px 20px 0px;
             status.textContent = "Saving to server…";
 
             // Normalize: keep local <video> entries in local row (not YouTube row)
-            const ytRow = document.querySelector('.video-row');
+            const ytRow = getYoutubeRow();
             if (ytRow) {
                 let localRow = document.querySelector('.local-video-row');
                 const localContainers = Array.from(ytRow.querySelectorAll('.video-container'))
@@ -3332,7 +3709,7 @@ padding: 50px 20px 20px 0px;
             // 1. Get Image Row HTML if it exists (it's in .notepad now)
             const imageRow = document.querySelector('.image-row');
             // 2. Get Video Row HTML if it exists (it's in .notepad now)
-            const videoRow = document.querySelector('.video-row');
+            const videoRow = getYoutubeRow();
             // 3. Get Local Video Row HTML if it exists
             const localVideoRow = document.querySelector('.local-video-row');
             let content = "";
@@ -3344,6 +3721,10 @@ padding: 50px 20px 20px 0px;
             }
             if (localVideoRow) {
                 content += localVideoRow.outerHTML;
+            }
+            const fileRow = document.querySelector(".file-row");
+            if (fileRow) {
+                content += fileRow.outerHTML;
             }
             // 3. Get Article Content
             content += article.innerHTML;
@@ -3556,6 +3937,10 @@ padding: 50px 20px 20px 0px;
             document.getElementById("videoInput").click();
         }
 
+        function triggerFileUpload() {
+            document.getElementById("genericFileInput").click();
+        }
+
         function getOrCreateImageCarousel() {
             let container = document.querySelector(".image-carousel-container");
             if (container) return container;
@@ -3611,7 +3996,12 @@ padding: 50px 20px 20px 0px;
 
         function getOrCreateVideoCarousel() {
             let row = document.querySelector(".video-row");
-            if (row) return row;
+            if (row) {
+                if (!row.dataset.carousel) {
+                    row.dataset.carousel = "youtube";
+                }
+                return row;
+            }
 
             const notepad = document.querySelector(".notepad");
             const carouselContainer = document.createElement("div");
@@ -3619,6 +4009,7 @@ padding: 50px 20px 20px 0px;
 
             row = document.createElement("div");
             row.className = "video-row";
+            row.dataset.carousel = "youtube";
 
             const controls = document.createElement("div");
             controls.className = "video-controls";
@@ -3646,6 +4037,67 @@ padding: 50px 20px 20px 0px;
             lucide.createIcons();
             scheduleDeleteHide();
             return row;
+        }
+
+        function getYoutubeRow() {
+            return document.querySelector('.video-row[data-carousel="youtube"]');
+        }
+
+        let _fileActiveIndex = 0;
+
+        function updateFileIndicators() {
+            const row = document.querySelector('.file-row');
+            const dotsContainer = document.querySelector('.file-controls .file-dots');
+            if (!row || !dotsContainer) return;
+            const cards = row.querySelectorAll('.file-card');
+            if (cards.length === 0) {
+                dotsContainer.innerHTML = "";
+                return;
+            }
+            const activeIndex = getActiveFileIndex(row, cards);
+            dotsContainer.innerHTML = "";
+            cards.forEach((card, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'file-dot' + (index === activeIndex ? ' active' : '');
+                dotsContainer.appendChild(dot);
+                card.classList.toggle('is-center', index === activeIndex);
+            });
+            _fileActiveIndex = activeIndex;
+        }
+
+        function getActiveFileIndex(row, cards) {
+            const rowRect = row.getBoundingClientRect();
+            const center = row.scrollLeft + rowRect.width / 2;
+            let bestIdx = 0;
+            let bestDist = Infinity;
+            cards.forEach((card, i) => {
+                const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+                const dist = Math.abs(cardCenter - center);
+                if (dist < bestDist) {
+                    bestDist = dist;
+                    bestIdx = i;
+                }
+            });
+            return bestIdx;
+        }
+
+function scrollFileRow(step) {
+            const row = document.querySelector('.file-row');
+            if (!row) return;
+            const cards = row.querySelectorAll('.file-card');
+            const active = Array.from(cards).findIndex(c => c.classList.contains('is-center'));
+            const currentIndex = active >= 0 ? active : _fileActiveIndex;
+            const nextIndex = Math.min(cards.length - 1, Math.max(0, currentIndex + step));
+            const target = cards[nextIndex];
+            if (target) scrollFileRowTo(target);
+        }
+
+        function scrollFileRowTo(target) {
+            const row = document.querySelector('.file-row');
+            if (!row || !target) return;
+            const left = target.offsetLeft - row.offsetLeft - (row.offsetWidth - target.offsetWidth) / 2;
+            row.scrollTo({ left, behavior: 'smooth' });
+            updateFileIndicators();
         }
 
         function getOrCreateLocalVideoCarousel() {
@@ -3684,9 +4136,176 @@ padding: 50px 20px 20px 0px;
             return row;
         }
 
+        function createFileControls(row) {
+            const controls = document.createElement("div");
+            controls.className = "file-controls";
+            controls.innerHTML = `
+                <button class="file-prev" title="Previous file"><i data-lucide="chevron-left"></i></button>
+                <div class="file-dots"></div>
+                <button class="file-next" title="Next file"><i data-lucide="chevron-right"></i></button>
+            `;
+            const navDots = controls.querySelector(".file-dots");
+            controls.querySelector(".file-prev")?.addEventListener("click", () => scrollFileRow(-1));
+            controls.querySelector(".file-next")?.addEventListener("click", () => scrollFileRow(1));
+            navDots?.addEventListener("click", (e) => {
+                const dotIndex = Array.from(navDots.children).indexOf(e.target.closest(".file-dot"));
+                if (dotIndex >= 0) {
+                    const cards = row.querySelectorAll(".file-card");
+                    const target = cards[dotIndex];
+                    if (target) scrollFileRowTo(target);
+                }
+            });
+            lucide.createIcons();
+            return controls;
+        }
+
+        function ensureFileControls(container, row) {
+            if (!container || !row) return;
+            if (!container.querySelector(".file-controls")) {
+                container.appendChild(createFileControls(row));
+            }
+        }
+
+        function getOrCreateFileCarousel() {
+            let row = document.querySelector(".file-row");
+            if (row) return row;
+
+            const notepad = document.querySelector(".notepad");
+            const container = document.createElement("div");
+            container.className = "file-carousel-container";
+            row = document.createElement("div");
+            row.className = "file-row";
+            container.appendChild(row);
+            container.appendChild(createFileControls(row));
+            notepad.insertBefore(container, notepad.firstChild);
+            row.addEventListener('scroll', () => {
+                clearTimeout(row.scrollTimeout);
+                row.scrollTimeout = setTimeout(updateFileIndicators, 60);
+            });
+            return row;
+        }
+
+        function createFilePlaceholder(file) {
+            const card = document.createElement("div");
+            card.className = "file-card uploading";
+            card.innerHTML = `
+                <div class="file-icon">${(file.name || "FILE").slice(0, 2).toUpperCase()}</div>
+                <div class="file-meta">
+                    <div class="file-name">${file.name}</div>
+                    <div class="file-size">0 / ${formatBytes(file.size)}</div>
+                    <div class="file-progress">
+                        <div class="file-progress-bar"></div>
+                    </div>
+                </div>
+                <div class="file-actions">
+                    <button disabled>Uploading…</button>
+                </div>
+            `;
+            return card;
+        }
+
+        function uploadGenericFile(file, placeholder) {
+            return new Promise((resolve) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open("POST", "/upload_file");
+                const progressBar = placeholder.querySelector(".file-progress-bar");
+                const sizeLabel = placeholder.querySelector(".file-size");
+
+                xhr.upload.onprogress = function (evt) {
+                    if (!evt.lengthComputable) return;
+                    const pct = Math.round((evt.loaded / evt.total) * 100);
+                    if (progressBar) progressBar.style.width = pct + "%";
+                    if (sizeLabel) {
+                        sizeLabel.textContent = `${formatBytes(evt.loaded)} / ${formatBytes(evt.total)}`;
+                    }
+                };
+
+                xhr.onload = function () {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        try {
+                            const payload = JSON.parse(xhr.responseText);
+                            finalizeFileCard(placeholder, payload);
+                            status.textContent = `Uploaded ${payload.name}`;
+                            setTimeout(() => status.textContent = "Ready", 2000);
+                        } catch (e) {
+                            placeholder.remove();
+                        }
+                    } else {
+                        placeholder.remove();
+                    }
+                    resolve();
+                };
+
+                xhr.onerror = function () {
+                    placeholder.remove();
+                    resolve();
+                };
+
+                const formData = new FormData();
+                formData.append("file", file);
+                xhr.send(formData);
+            });
+        }
+
+        function finalizeFileCard(card, info) {
+            if (!card || !info) return;
+            const fileName = info.name || "file";
+            const ext = fileName.split(".").pop().slice(0, 3).toUpperCase() || "DOC";
+            const isAudio = (info.mime || "").startsWith("audio/");
+            card.classList.remove("uploading");
+            card.innerHTML = `
+                <div class="file-art">${isAudio ? `<i data-lucide="music"></i>` : ext}</div>
+                <div class="file-meta">
+                    <div class="file-name">${fileName}</div>
+                    <div class="file-size">${formatBytes(info.size || 0)}</div>
+                </div>
+                ${isAudio ? `
+                    <div class="file-preview">
+                        <audio controls preload="metadata" src="${info.url}"></audio>
+                    </div>
+                ` : ""}
+                <div class="file-actions">
+                    <a href="${info.download_url || info.url}" download="${info.name || fileName}">
+                        <i data-lucide="download"></i> Download
+                    </a>
+                    <button class="file-delete" onclick="deleteFileCard(this)" title="Delete File">
+                        <i data-lucide="trash-2"></i>
+                    </button>
+                </div>
+            `;
+            lucide.createIcons();
+            saveServer();
+            const audioEl = card.querySelector('.file-preview audio');
+            if (audioEl) {
+                audioEl.addEventListener('play', () => {
+                    pauseAllAudioPreviews(audioEl);
+                    pauseAllLocalVideos();
+                    pauseAllYoutubePlayers();
+                    updateFileIndicators();
+                });
+                audioEl.addEventListener('pause', () => {
+                    updateFileIndicators();
+                });
+            }
+            updateFileIndicators();
+        }
+
+        function deleteFileCard(btn) {
+            if (!confirm("Delete this file?")) return;
+            const card = btn.closest(".file-card");
+            if (!card) return;
+            const row = card.closest(".file-row");
+            card.remove();
+            if (row && row.querySelectorAll(".file-card").length === 0) {
+                const container = row.closest(".file-carousel-container");
+                if (container) container.remove();
+            }
+            saveServer();
+        }
+
         function setupLocalVideoPreview(video) {
             if (!video) return;
-            video.removeAttribute("controls");
+            video.setAttribute("controls", "controls");
             video.setAttribute("preload", "metadata");
             const audioAllowed = localStorage.getItem('localVideoAudio') === 'true';
             video.muted = !audioAllowed;
@@ -3730,7 +4349,7 @@ padding: 50px 20px 20px 0px;
             }, { once: true });
 
             video.addEventListener("play", () => {
-                pauseOtherLocalVideos(video);
+                pauseAllLocalVideos(video);
                 if (video.muted) {
                     video.muted = false;
                     localStorage.setItem('localVideoAudio', 'true');
@@ -3758,6 +4377,22 @@ padding: 50px 20px 20px 0px;
             });
         }
 
+        function pauseAllYoutubePlayers(except = null) {
+            ytPlayers.forEach(p => {
+                if (p !== except) {
+                    try { p.pauseVideo(); } catch (e) { }
+                }
+            });
+        }
+
+        function pauseAllAudioPreviews(except = null) {
+            document.querySelectorAll('.file-preview audio').forEach(a => {
+                if (a !== except) {
+                    try { a.pause(); } catch (e) { }
+                }
+            });
+        }
+
         function ensureLocalVideoHandlers(video) {
             if (video.dataset.handlersAttached === "true") return;
             video.addEventListener('click', () => {
@@ -3770,7 +4405,9 @@ padding: 50px 20px 20px 0px;
             });
 
             video.addEventListener("play", () => {
-                pauseOtherLocalVideos(video);
+                pauseAllLocalVideos(video);
+                pauseAllAudioPreviews();
+                pauseAllYoutubePlayers();
                 if (video.muted) {
                     video.muted = false;
                     localStorage.setItem('localVideoAudio', 'true');
@@ -3803,9 +4440,9 @@ padding: 50px 20px 20px 0px;
             updateLocalAudioButton(video, video.muted);
         }
 
-        function pauseOtherLocalVideos(current) {
+        function pauseAllLocalVideos(except = null) {
             document.querySelectorAll('.video-container video').forEach(v => {
-                if (v !== current) {
+                if (v !== except) {
                     try { v.pause(); } catch (e) { }
                 }
             });
@@ -4300,7 +4937,7 @@ padding: 50px 20px 20px 0px;
                 const nextPlayer = ytPlayers[currentIndex + 1];
                 try {
                     // Scroll the carousel so the next video is visible
-                    const row = document.querySelector('.video-row');
+                    const row = getYoutubeRow();
                     const containers = row ? row.querySelectorAll('.video-container') : null;
                     const nextContainer = containers ? containers[currentIndex + 1] : null;
                     if (nextContainer && row) {
@@ -4331,13 +4968,13 @@ padding: 50px 20px 20px 0px;
                     if (container) {
                         _activeContainer = container;
                         _activeVideoId = container.dataset.videoId || _activeVideoId;
-                        const row = document.querySelector('.video-row');
+                        const row = getYoutubeRow();
                         if (row) {
                             const containers = row.querySelectorAll('.video-container');
                             _lastActiveIndex = Array.from(containers).indexOf(container);
                         }
-                    }
-                } catch (e) { }
+                }
+            } catch (e) { }
                 if (playBtn) {
                     playBtn.innerHTML = '<i data-lucide="pause"></i>';
                     lucide.createIcons();
@@ -4377,99 +5014,39 @@ padding: 50px 20px 20px 0px;
         let _pillInterval = null;
         let _localPillInterval = null;
 
-       function updatePillProgress(container, rowSelector, containerSelector) {
-    if (!container) return;
+        function updatePillProgress() {
+            const row = getYoutubeRow();
+            if (!row) return;
 
-    const row = container.querySelector(rowSelector);
-    if (!row) return;
+            const scrollLeft = row.scrollLeft;
+            const width = row.offsetWidth || 1;
+            const activeIndex = Math.round(scrollLeft / width);
 
-    const scrollLeft = row.scrollLeft;
-    const width = row.offsetWidth || 1;
-    const activeIndex = Math.round(scrollLeft / width);
+            const activeFill = document.querySelector('.indicators .dot.active .dot-fill');
+            if (!activeFill) return;
 
-    const dots = container.querySelectorAll('.dot');
-    const activeDot = dots[activeIndex];
-    if (!activeDot) return;
+            // 🔴 YOUTUBE
+            if (typeof ytPlayers !== "undefined" && ytPlayers[activeIndex]) {
+                try {
+                    const player = ytPlayers[activeIndex];
+                    const dur = player.getDuration();
+                    const cur = player.getCurrentTime();
+                    const pct = dur > 0 ? (cur / dur) * 100 : 0;
+                    activeFill.style.width = Math.max(0, Math.min(100, pct)) + '%';
+                } catch (e) {
+                    activeFill.style.width = '0%';
+                }
+                return;
+            }
 
-    const activeFill = activeDot.querySelector('.dot-fill');
-    if (!activeFill) return;
-
-    const containers = row.querySelectorAll(containerSelector);
-    const activeContainer = containers[activeIndex] || null;
-
-    if (!activeContainer) {
-        activeFill.style.width = '0%';
-        return;
-    }
-
-    // 🔵 LOCAL VIDEO
-    const localVideo = activeContainer.querySelector('video');
-    if (localVideo) {
-        const dur = localVideo.duration || 0;
-        const cur = localVideo.currentTime || 0;
-        const pct = dur > 0 ? (cur / dur) * 100 : 0;
-        activeFill.style.width = Math.max(0, Math.min(100, pct)) + '%';
-        return;
-    }
-
-    // 🔴 YOUTUBE
-    if (typeof ytPlayers !== "undefined" && ytPlayers[activeIndex]) {
-        try {
-            const player = ytPlayers[activeIndex];
-            const dur = player.getDuration();
-            const cur = player.getCurrentTime();
-            const pct = dur > 0 ? (cur / dur) * 100 : 0;
-            activeFill.style.width = Math.max(0, Math.min(100, pct)) + '%';
-        } catch (e) {
             activeFill.style.width = '0%';
         }
-        return;
-    }
 
-    activeFill.style.width = '0%';
-}
-const ytContainer = document.querySelector('.video-carousel-container');
+        function startPillUpdater() {
+            if (_pillInterval) return;
+            _pillInterval = setInterval(updatePillProgress, 250);
+        }
 
-updatePillProgress(
-    ytContainer,
-    '.video-row',
-    '.video-container'
-);
-const localContainer = document.querySelector('.local-video-carousel-container');
-
-updatePillProgress(
-    localContainer,
-    '.local-video-row',
-    '.video-container'
-);
-
-      function startPillUpdater(container) {
-    const video = container.querySelector('video');
-
-    if (!video) return;
-
-    video.addEventListener('timeupdate', () => {
-        if (!video.duration) return;
-        const progress = video.currentTime / video.duration;
-        updatePillProgress(container, progress);
-    });
-}
-
-function initYouTubeSection() {
-    const ytContainer = document.querySelector('.video-carousel-container');
-    if (!ytContainer) return;
-
-    renderIndicators(ytContainer, '.video-row');
-    initYouTubePlayers?.();
-}
-
-function initLocalVideoSection() {
-    const localContainer = document.querySelector('.local-video-carousel-container');
-    if (!localContainer) return;
-
-    renderIndicators(localContainer, '.local-video-row');
-    startPillUpdater(localContainer);
-}
         function stopPillUpdater() {
             if (_pillInterval) {
                 clearInterval(_pillInterval);
@@ -4505,106 +5082,69 @@ function initLocalVideoSection() {
         };
 
         // Seek by clicking on the active dot (which expands into a pill)
-       document.addEventListener('click', (e) => {
-    const dot = e.target.closest('.dot');
-    if (!dot || !dot.classList.contains('active')) return;
+        document.addEventListener('click', (e) => {
+            const dot = e.target.closest('.dot');
+            if (!dot || !dot.classList.contains('active')) return;
 
-    const container = dot.closest(
-        '.video-carousel-container, .local-video-carousel-container'
-    );
-    if (!container) return;
+            const rect = dot.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const pct = Math.max(0, Math.min(1, x / rect.width));
 
-    const rect = dot.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const pct = Math.max(0, Math.min(1, x / rect.width));
-
-    // Detect correct row type
-    const row = container.querySelector('.video-row, .local-video-row');
-    if (!row) return;
-
-    const activeIndex = Math.round(
-        row.scrollLeft / (row.offsetWidth || 1)
-    );
-
-    const containers = row.querySelectorAll('.video-container');
-    const activeContainer = containers[activeIndex];
-    if (!activeContainer) return;
-
-    // 🔵 LOCAL VIDEO SEEK
-    const localVideo = activeContainer.querySelector('video');
-    if (localVideo && localVideo.duration) {
-        localVideo.currentTime = pct * localVideo.duration;
-        updatePillProgress(
-            container,
-            row.classList.contains('local-video-row')
-                ? '.local-video-row'
-                : '.video-row',
-            '.video-container'
-        );
-        return;
-    }
-
-    // 🔴 YOUTUBE SEEK
-    if (typeof ytPlayers !== "undefined" && ytPlayers[activeIndex]) {
-        try {
-            const player = ytPlayers[activeIndex];
-            const dur = player.getDuration();
-            player.seekTo(pct * dur, true);
-
-            updatePillProgress(
-                container,
-                '.video-row',
-                '.video-container'
-            );
-        } catch (err) {}
-    }
-});
+            if (dot.closest('.local-indicators')) {
+                const row = document.querySelector('.local-video-row');
+                if (!row) return;
+                const activeIndex = Math.round(row.scrollLeft / (row.offsetWidth || 1));
+                const containers = row.querySelectorAll('.video-container');
+                const activeContainer = containers[activeIndex];
+                const localVideo = activeContainer ? activeContainer.querySelector('video') : null;
+                if (localVideo && localVideo.duration) {
+                    localVideo.currentTime = pct * localVideo.duration;
+                    updateLocalPillProgress();
+                }
+            } else if (dot.closest('.indicators')) {
+                const row = getYoutubeRow();
+                if (!row) return;
+                const activeIndex = Math.round(row.scrollLeft / (row.offsetWidth || 1));
+                const player = ytPlayers[activeIndex];
+                if (player && player.seekTo) {
+                    try {
+                        const dur = player.getDuration();
+                        player.seekTo(pct * dur, true);
+                        updatePillProgress();
+                    } catch (e) { }
+                }
+            }
+        });
 
         // Drag scrub on the active pill (YouTube-like)
-       function scrubToPercent(container, pct) {
-    if (!container) return;
+        function scrubToPercent(pct, dot) {
+            if (!dot) return;
+            if (dot.closest('.local-indicators')) {
+                const row = document.querySelector('.local-video-row');
+                if (!row) return;
+                const activeIndex = Math.round(row.scrollLeft / (row.offsetWidth || 1));
+                const containers = row.querySelectorAll('.video-container');
+                const activeContainer = containers[activeIndex] || null;
+                const localVideo = activeContainer ? activeContainer.querySelector('video') : null;
+                if (localVideo && localVideo.duration) {
+                    localVideo.currentTime = pct * localVideo.duration;
+                    updateLocalPillProgress();
+                }
+            } else if (dot.closest('.indicators')) {
+                const row = getYoutubeRow();
+                if (!row) return;
+                const activeIndex = Math.round(row.scrollLeft / (row.offsetWidth || 1));
+                const player = (ytPlayers && ytPlayers[activeIndex]) ? ytPlayers[activeIndex] : null;
 
-    const row = container.querySelector('.video-row, .local-video-row');
-    if (!row) return;
-
-    const activeIndex = Math.round(
-        row.scrollLeft / (row.offsetWidth || 1)
-    );
-
-    const containers = row.querySelectorAll('.video-container');
-    const activeContainer = containers[activeIndex] || null;
-    if (!activeContainer) return;
-
-    // 🔵 LOCAL VIDEO
-    const localVideo = activeContainer.querySelector('video');
-    if (localVideo && localVideo.duration) {
-        localVideo.currentTime = pct * localVideo.duration;
-
-        updatePillProgress(
-            container,
-            row.classList.contains('local-video-row')
-                ? '.local-video-row'
-                : '.video-row',
-            '.video-container'
-        );
-        return;
-    }
-
-    // 🔴 YOUTUBE
-    if (typeof ytPlayers !== "undefined" && ytPlayers[activeIndex]) {
-        try {
-            const player = ytPlayers[activeIndex];
-            const dur = player.getDuration();
-            player.seekTo(pct * dur, true);
-
-            updatePillProgress(
-                container,
-                '.video-row',
-                '.video-container'
-            );
-        } catch (e) {}
-    }
-}
+                if (player && player.seekTo) {
+                    try {
+                        const dur = player.getDuration();
+                        player.seekTo(pct * dur, true);
+                        updatePillProgress();
+                    } catch (e) { }
+                }
+            }
+        }
 
         function handleScrubEvent(e) {
             const dot = e.target.closest('.dot.active');
@@ -4612,7 +5152,7 @@ function initLocalVideoSection() {
             const rect = dot.getBoundingClientRect();
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-            scrubToPercent(pct);
+            scrubToPercent(pct, dot);
         }
 
         document.addEventListener('mousedown', (e) => {
@@ -4642,32 +5182,26 @@ function initLocalVideoSection() {
         }, { passive: true });
 
         /* Carousel UI Helpers */
-       function renderIndicators(container, rowSelector) {
-    if (!container) return;
+        function renderIndicators() {
+            const row = getYoutubeRow();
+            const indicatorContainer = document.querySelector('.indicators');
+            if (!row || !indicatorContainer) return;
 
-    const rows = container.querySelectorAll(rowSelector);
-    let indicatorBar = container.querySelector('.indicator-bar');
+            const videos = row.querySelectorAll('.video-container');
+            indicatorContainer.innerHTML = '';
+            videos.forEach((v, i) => {
+                const dot = document.createElement('div');
+                dot.className = 'dot' + (i === 0 ? ' active' : '');
+                dot.innerHTML = '<div class="dot-fill"></div>';
+                dot.onclick = () => {
+                    const scrollAmount = v.offsetLeft - row.offsetLeft;
+                    row.scrollTo({ left: scrollAmount, behavior: 'smooth' });
+                };
+                indicatorContainer.appendChild(dot);
+            });
 
-    if (!indicatorBar) {
-        indicatorBar = document.createElement('div');
-        indicatorBar.className = 'indicator-bar';
-        container.appendChild(indicatorBar);
-    }
-
-    indicatorBar.innerHTML = '';
-
-    rows.forEach((_, index) => {
-        const dot = document.createElement('div');
-        dot.className = 'indicator-dot';
-        dot.dataset.index = index;
-
-        const fill = document.createElement('div');
-        fill.className = 'dot-fill';
-
-        dot.appendChild(fill);
-        indicatorBar.appendChild(dot);
-    });
-}
+            setTimeout(updateIndicators, 40);
+        }
 
         let _lastActiveIndex = 0;
         let _activeContainer = null;
@@ -4711,35 +5245,19 @@ function initLocalVideoSection() {
             return containers[idx] || null;
         }
 
-       function rememberActiveIndex(container) {
-    if (!container) return;
-
-    const row = container.querySelector('.video-row, .local-video-row');
-    if (!row) return;
-
-    const containers = row.querySelectorAll('.video-container');
-    if (!containers.length) return;
-
-    const activeIndex = Math.round(
-        row.scrollLeft / (row.offsetWidth || 1)
-    );
-
-    const activeContainer = containers[activeIndex] || null;
-
-    // Store state per container
-    container._activeContainer = activeContainer || null;
-    container._lastActiveIndex = activeIndex;
-
-    if (activeContainer) {
-        container._activeVideoId =
-            activeContainer.dataset.videoId || null;
-    }
-}
-rememberActiveIndex();
-
+        function rememberActiveIndex() {
+            const row = getYoutubeRow();
+            if (!row) return;
+            _activeContainer = resolveActiveContainer(row);
+            const containers = row.querySelectorAll('.video-container');
+            _lastActiveIndex = _activeContainer ? Array.from(containers).indexOf(_activeContainer) : getActiveIndexByCenter(row);
+            if (_activeContainer) {
+                _activeVideoId = _activeContainer.dataset.videoId || null;
+            }
+        }
 
         function realignCarouselToActive() {
-            const row = document.querySelector('.video-row');
+            const row = getYoutubeRow();
             if (!row) return;
             const containers = row.querySelectorAll('.video-container');
             if (!containers || containers.length === 0) return;
@@ -4767,8 +5285,8 @@ rememberActiveIndex();
         }
 
         function updateIndicators() {
-            const row = document.querySelector('.video-row');
-            const indicators = document.querySelectorAll('.dot');
+            const row = getYoutubeRow();
+            const indicators = document.querySelectorAll('.indicators .dot');
             if (!row) return;
             if (indicators.length === 0) {
                 renderIndicators();
@@ -4897,7 +5415,7 @@ rememberActiveIndex();
 
         let _rowIdleTimer = null;
         function bumpRow() {
-            const row = document.querySelector('.video-row');
+            const row = getYoutubeRow();
             if (!row) return;
             row.classList.add('is-scrolling');
             clearTimeout(_rowIdleTimer);
@@ -4905,9 +5423,9 @@ rememberActiveIndex();
                 row.classList.remove('is-scrolling');
             }, 220);
         }
-//combined play/pause toggle for both local and YouTube videos, based on active video in carousel
+        //combined play/pause toggle for both local and YouTube videos, based on active video in carousel
         function togglePlayPause(btn) {
-            const row = document.querySelector('.video-row');
+            const row = getYoutubeRow();
             if (!row) return;
 
             const scrollLeft = row.scrollLeft;
@@ -4938,10 +5456,12 @@ rememberActiveIndex();
 
             try {
                 const state = currentPlayer.getPlayerState();
-                if (state === YT.PlayerState.PLAYING) {
-                    currentPlayer.pauseVideo();
-                } else {
+                const shouldPlay = state !== YT.PlayerState.PLAYING;
+                updateGlobalPlayButton(shouldPlay);
+                if (shouldPlay) {
                     currentPlayer.playVideo();
+                } else {
+                    currentPlayer.pauseVideo();
                 }
             } catch (e) {
                 console.error("Error toggling play/pause", e);
@@ -5040,16 +5560,13 @@ rememberActiveIndex();
         });
 
         // Initialize on page load
-        window.addEventListener('DOMContentLoaded', () => {
-            loadGridModePreference();
-            initMusicSection();
-        });
+        window.addEventListener('DOMContentLoaded', loadGridModePreference);
 
         let _resizeTimer = null;
         function handleViewportChange() {
             rememberActiveIndex();
             _lockActive = true;
-            const row = document.querySelector('.video-row');
+            const row = getYoutubeRow();
             if (row && _snapBackup === null) {
                 _snapBackup = row.style.scrollSnapType || '';
                 row.style.scrollSnapType = 'none';
@@ -5100,7 +5617,7 @@ rememberActiveIndex();
                 }
             }
 
-                            const row = getOrCreateLocalVideoCarousel();
+            const row = getOrCreateVideoCarousel();
 
             // Create the container
             // We use 'allow-popups' etc to ensure playlist UI works well
@@ -5135,20 +5652,26 @@ rememberActiveIndex();
                 } catch (e) { }
             }, 1000);
 
-            saveServer();
+            saveServer().then(() => {
+                if (current) openDoc(current);
+            });
             renderIndicators(); // Refresh dots
+            initYouTubePlayers();
+            startPillUpdater();
             scheduleDeleteHide();
             status.textContent = "Video/Playlist added";
             setTimeout(() => status.textContent = "Ready", 2000);
         }
 
 
-        document.getElementById("videoInput").addEventListener("change", async function () {
-            if (this.files && this.files.length > 0) {
-                for (const file of this.files) {
+        function handleLocalVideoInputChange() {
+            const input = document.getElementById("videoInput");
+            if (!input || !input.files || input.files.length === 0) return;
+            (async () => {
+                for (const file of input.files) {
                     await new Promise(resolve => {
                         const UPLOAD_BASE = "";
-                        const row = getOrCreateVideoCarousel();
+                        const row = getOrCreateLocalVideoCarousel();
                         const containerId = `local:${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
                         const placeholderHtml = `
                             <div class="video-container" data-video-id="${containerId}">
@@ -5162,7 +5685,7 @@ rememberActiveIndex();
                             </div>
                         `;
                         row.insertAdjacentHTML('beforeend', placeholderHtml);
-                        renderIndicators();
+                        renderLocalIndicators();
                         scheduleDeleteHide();
                         const placeholder = row.querySelector(`.video-container[data-video-id="${containerId}"]`);
                         const bar = placeholder ? placeholder.querySelector('.upload-bar') : null;
@@ -5214,10 +5737,13 @@ rememberActiveIndex();
                                 `;
                                 const localVideo = placeholder.querySelector('video');
                                 setupLocalVideoPreview(localVideo);
-                                renderIndicators();
+                                renderLocalIndicators();
+                                startLocalPillUpdater();
                                 scheduleDeleteHide();
                                 ensureVideoObserver();
-                                saveServer();
+                                saveServer().then(() => {
+                                    if (current) openDoc(current);
+                                });
                                 resolve();
                             } else {
                                 placeholder.remove();
@@ -5231,8 +5757,28 @@ rememberActiveIndex();
                         xhr.send(formData);
                     });
                 }
+            })().finally(() => {
+                input.value = "";
+            });
+        }
+
+        function bindVideoUploader() {
+            const input = document.getElementById("videoInput");
+            if (!input) return;
+            input.removeEventListener("change", handleLocalVideoInputChange);
+            input.addEventListener("change", handleLocalVideoInputChange);
+        }
+
+        document.getElementById("genericFileInput").addEventListener("change", async function () {
+            if (this.files && this.files.length > 0) {
+                const row = getOrCreateFileCarousel();
+                for (const file of this.files) {
+                    const placeholder = createFilePlaceholder(file);
+                    row.appendChild(placeholder);
+                    await uploadGenericFile(file, placeholder);
+                }
             }
-            this.value = ""; // Reset
+            this.value = "";
         });
 
         function formatBytes(bytes) {
@@ -5250,492 +5796,6 @@ rememberActiveIndex();
             const s = Math.floor(seconds % 60);
             if (m <= 0) return `${s}s`;
             return `${m}m ${s}s`;
-        }
-
-        const musicState = {
-            tracks: [],
-            currentId: null,
-            selectMode: false,
-            selectedIds: new Set(),
-            downloading: false,
-            docName: "global"
-        };
-
-        function buildTrackFromPayload(payload) {
-            return {
-                id: payload.id,
-                name: payload.name || payload.original_name || "Audio",
-                size: Number(payload.size) || 0,
-                url: payload.url,
-                downloadUrl: payload.download_url || payload.downloadUrl || payload.url,
-                status: "Ready",
-                audio: null,
-                card: null,
-                playIcon: null,
-                playLabel: null,
-                progressFill: null,
-                progressTrack: null,
-                timeLabel: null,
-                checkbox: null,
-                downloadStatusEl: null
-            };
-        }
-
-        function loadMusicForDoc(docName) {
-            const targetDoc = (docName || current || "global").trim() || "global";
-            musicState.docName = targetDoc;
-            const params = new URLSearchParams({ doc: targetDoc });
-            fetch(`/music_tracks?${params.toString()}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (!Array.isArray(data)) throw new Error("Invalid track data");
-                    musicState.tracks = data.map(buildTrackFromPayload);
-                    musicState.currentId = null;
-                    renderMusicTracks();
-                })
-                .catch(() => updateMusicStatusLabel("Could not load music library"));
-        }
-
-        function initMusicSection() {
-            const helpers = {
-                upload: document.getElementById("musicUploadBtn"),
-                selectMode: document.getElementById("musicSelectModeBtn"),
-                selectAll: document.getElementById("musicSelectAllBtn"),
-                invert: document.getElementById("musicInvertSelectionBtn"),
-                deleteSelected: document.getElementById("musicDeleteSelectedBtn"),
-                deleteAll: document.getElementById("musicDeleteAllBtn"),
-                downloadSelected: document.getElementById("musicDownloadSelectedBtn"),
-                downloadAll: document.getElementById("musicDownloadAllBtn"),
-                input: document.getElementById("musicUploadInput")
-            };
-            helpers.upload?.addEventListener("click", () => helpers.input?.click());
-            helpers.input?.addEventListener("change", handleMusicUpload);
-            helpers.selectMode?.addEventListener("click", toggleMusicSelectMode);
-            helpers.selectAll?.addEventListener("click", selectAllMusicTracks);
-            helpers.invert?.addEventListener("click", invertMusicSelection);
-            helpers.deleteSelected?.addEventListener("click", deleteSelectedMusic);
-            helpers.deleteAll?.addEventListener("click", deleteAllMusic);
-            helpers.downloadSelected?.addEventListener("click", () => handleMusicDownloads(getSelectedMusicTracks()));
-            helpers.downloadAll?.addEventListener("click", () => handleMusicDownloads([...musicState.tracks]));
-            ensureMusicSectionVisibility();
-            loadMusicForDoc(current || "global");
-        }
-
-        function handleMusicUpload(event) {
-            const files = Array.from(event.target?.files || []);
-            if (!files.length) return;
-            updateMusicStatusLabel(`Uploading ${files.length} track${files.length > 1 ? "s" : ""}...`);
-            (async () => {
-                for (const file of files) {
-                    await uploadMusicFile(file);
-                }
-                event.target.value = "";
-                updateMusicStatusLabel(`${musicState.tracks.length} track${musicState.tracks.length === 1 ? "" : "s"} ready`);
-            })();
-        }
-
-        function uploadMusicFile(file) {
-            return new Promise(resolve => {
-                const xhr = new XMLHttpRequest();
-                const docParam = encodeURIComponent(musicState.docName || current || "global");
-                xhr.open("POST", `/upload_file?doc=${docParam}`, true);
-                xhr.onload = function () {
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        try {
-                            const payload = JSON.parse(xhr.responseText);
-                            addMusicTrack(payload);
-                        } catch (e) {
-                            updateMusicStatusLabel("Upload failed");
-                        }
-                    } else {
-                        updateMusicStatusLabel("Upload failed");
-                    }
-                    resolve();
-                };
-                xhr.onerror = function () {
-                    updateMusicStatusLabel("Upload failed");
-                    resolve();
-                };
-                const formData = new FormData();
-                formData.append("file", file);
-                xhr.send(formData);
-            });
-        }
-
-        function addMusicTrack(info, options = {}) {
-            if (!info || !info.url) return;
-            const track = buildTrackFromPayload(info);
-            musicState.tracks.push(track);
-            renderMusicTracks();
-            if (options.autoplay !== false && !musicState.currentId) {
-                playMusicTrack(track);
-            }
-        }
-
-        function renderMusicTracks() {
-            const row = document.getElementById("musicRow");
-            if (!row) return;
-            row.innerHTML = "";
-            musicState.tracks.forEach(track => row.appendChild(createMusicCard(track)));
-            updateMusicSectionStatus();
-            updateMusicGlobalIndicator();
-            ensureMusicSectionVisibility();
-            lucide.createIcons();
-            applyMusicRowSelectMode();
-        }
-
-        function applyMusicRowSelectMode() {
-            const row = document.getElementById("musicRow");
-            if (!row) return;
-            row.classList.toggle("select-mode", musicState.selectMode);
-        }
-
-        function createMusicCard(track) {
-            const card = document.createElement("div");
-            card.className = "music-card";
-            card.dataset.id = track.id;
-            card.innerHTML = `
-                <label class="music-select">
-                    <input type="checkbox">
-                    Select
-                </label>
-                <div class="music-art">
-                    <i data-lucide="music"></i>
-                </div>
-                <div class="music-meta">
-                    <div class="music-title">${track.name}</div>
-                    <div class="music-size">${formatBytes(track.size)}</div>
-                </div>
-                <button class="music-play-btn">
-                    <i data-lucide="play"></i>
-                    <span>Play</span>
-                </button>
-                <div class="music-progress-track">
-                    <div class="music-progress-fill"></div>
-                </div>
-                <div class="music-progress-time">0:00 / 0:00</div>
-                <div class="music-actions">
-                    <button class="music-download-btn">
-                        <i data-lucide="download"></i>
-                        Download
-                    </button>
-                    <button class="music-delete-btn">
-                        <i data-lucide="trash-2"></i>
-                        Delete
-                    </button>
-                </div>
-                <div class="music-download-status">${track.status}</div>
-                <audio src="${track.url}" preload="metadata"></audio>
-            `;
-            const checkbox = card.querySelector("input[type=checkbox]");
-            const playBtn = card.querySelector(".music-play-btn");
-            const playIcon = playBtn?.querySelector("i");
-            const playLabel = playBtn?.querySelector("span");
-            const progressTrack = card.querySelector(".music-progress-track");
-            const progressFill = card.querySelector(".music-progress-fill");
-            const timeLabel = card.querySelector(".music-progress-time");
-            const downloadBtn = card.querySelector(".music-download-btn");
-            const deleteBtn = card.querySelector(".music-delete-btn");
-            const downloadStatusEl = card.querySelector(".music-download-status");
-            const audio = card.querySelector("audio");
-
-            track.card = card;
-            track.checkbox = checkbox;
-            track.playIcon = playIcon;
-            track.playLabel = playLabel;
-            track.progressTrack = progressTrack;
-            track.progressFill = progressFill;
-            track.timeLabel = timeLabel;
-            track.downloadStatusEl = downloadStatusEl;
-            track.audio = audio;
-
-            if (checkbox) {
-                checkbox.checked = musicState.selectedIds.has(track.id);
-                checkbox.addEventListener("change", () => updateMusicSelection(track.id, checkbox.checked));
-            }
-            playBtn?.addEventListener("click", () => toggleMusicPlay(track.id));
-            progressTrack?.addEventListener("click", event => {
-                if (!track.audio?.duration) return;
-                const rect = progressTrack.getBoundingClientRect();
-                const pct = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
-                track.audio.currentTime = pct * track.audio.duration;
-            });
-            downloadBtn?.addEventListener("click", () => handleMusicDownloads([track]));
-            deleteBtn?.addEventListener("click", () => {
-                deleteMusicTrack(track.id).finally(() => loadMusicForDoc(musicState.docName));
-            });
-
-            audio?.addEventListener("loadedmetadata", () => updateMusicProgress(track));
-            audio?.addEventListener("timeupdate", () => updateMusicProgress(track));
-            audio?.addEventListener("ended", () => {
-                playNextMusic(track.id);
-            });
-
-            return card;
-        }
-
-        function toggleMusicPlay(id) {
-            const track = musicState.tracks.find(t => t.id === id);
-            if (!track || !track.audio) return;
-            if (musicState.currentId === id && !track.audio.paused) {
-                pauseMusicTrack(track);
-                return;
-            }
-            playMusicTrack(track);
-        }
-
-        function playMusicTrack(track) {
-            if (!track.audio) return;
-            pauseOtherMusic(track.id);
-            track.audio.play().catch(() => { });
-            musicState.currentId = track.id;
-            track.card?.classList.add("is-playing");
-            updateMusicButtons();
-            updateMusicGlobalIndicator();
-        }
-
-        function pauseMusicTrack(track) {
-            if (!track.audio) return;
-            track.audio.pause();
-            if (musicState.currentId === track.id) {
-                musicState.currentId = null;
-            }
-            track.card?.classList.remove("is-playing");
-            updateMusicButtons();
-            updateMusicGlobalIndicator();
-        }
-
-        function pauseOtherMusic(exceptId) {
-            musicState.tracks.forEach(track => {
-                if (track.id !== exceptId && track.audio) {
-                    track.audio.pause();
-                    track.card?.classList.remove("is-playing");
-                }
-            });
-        }
-
-        function updateMusicButtons() {
-            musicState.tracks.forEach(track => {
-                const isPlaying = track.id === musicState.currentId && track.audio && !track.audio.paused;
-                track.card?.classList.toggle("is-playing", isPlaying);
-                if (track.playIcon) {
-                    track.playIcon.dataset.lucide = isPlaying ? "pause" : "play";
-                }
-                if (track.playLabel) {
-                    track.playLabel.textContent = isPlaying ? "Pause" : "Play";
-                }
-            });
-            lucide.createIcons();
-        }
-
-        function updateMusicProgress(track) {
-            if (!track || !track.audio) return;
-            const duration = track.audio.duration || 0;
-            const current = track.audio.currentTime || 0;
-            const pct = duration ? (current / duration) * 100 : 0;
-            if (track.progressFill) {
-                track.progressFill.style.width = `${pct}%`;
-            }
-            if (track.timeLabel) {
-                track.timeLabel.textContent = `${formatTime(current)} / ${formatTime(duration)}`;
-            }
-        }
-
-        function toggleMusicSelectMode() {
-            musicState.selectMode = !musicState.selectMode;
-            const row = document.getElementById("musicRow");
-            row?.classList.toggle("select-mode", musicState.selectMode);
-            applyMusicRowSelectMode();
-        }
-
-        function selectAllMusicTracks() {
-            musicState.selectMode = true;
-            const row = document.getElementById("musicRow");
-            row?.classList.add("select-mode");
-            musicState.tracks.forEach(track => musicState.selectedIds.add(track.id));
-            renderMusicTracks();
-        }
-
-        function invertMusicSelection() {
-            const row = document.getElementById("musicRow");
-            if (!row) return;
-            musicState.selectMode = true;
-            row.classList.add("select-mode");
-            const next = new Set();
-            musicState.tracks.forEach(track => {
-                if (!musicState.selectedIds.has(track.id)) {
-                    next.add(track.id);
-                }
-            });
-            musicState.selectedIds = next;
-            renderMusicTracks();
-        }
-
-        function deleteSelectedMusic() {
-            if (musicState.selectedIds.size === 0) {
-                updateMusicStatusLabel("No tracks selected");
-                return;
-            }
-            const ids = Array.from(musicState.selectedIds);
-            Promise.all(ids.map(id => deleteMusicTrack(id)))
-                .finally(() => {
-                    musicState.selectedIds.clear();
-                    musicState.currentId = null;
-                    musicState.selectMode = false;
-                    loadMusicForDoc(musicState.docName);
-                });
-        }
-
-        function deleteAllMusic() {
-            if (musicState.tracks.length === 0) return;
-            const ids = musicState.tracks.map(track => track.id);
-            Promise.all(ids.map(id => deleteMusicTrack(id)))
-                .finally(() => {
-                    musicState.selectedIds.clear();
-                    musicState.currentId = null;
-                    musicState.selectMode = false;
-                    loadMusicForDoc(musicState.docName);
-                });
-        }
-
-        function getSelectedMusicTracks() {
-            return musicState.tracks.filter(track => musicState.selectedIds.has(track.id));
-        }
-
-        function handleMusicDownloads(tracks) {
-            if (!tracks || tracks.length === 0) {
-                updateMusicStatusLabel("No tracks to download");
-                return;
-            }
-            if (musicState.downloading) return;
-            musicState.downloading = true;
-            const total = tracks.length;
-            const fill = document.getElementById("musicProgressFill");
-            const label = document.getElementById("musicProgressLabel");
-            let completed = 0;
-            if (fill) fill.style.width = "0%";
-            if (label) label.textContent = `Downloading 0 / ${total}`;
-            const run = async () => {
-                for (const track of tracks) {
-                    await triggerTrackDownload(track);
-                    completed++;
-                    const ratio = completed / total;
-                    if (fill) fill.style.width = `${ratio * 100}%`;
-                    if (label) label.textContent = `Downloading ${completed} / ${total}`;
-                }
-                if (label) label.textContent = "Download complete";
-            };
-            run()
-                .catch(() => updateMusicStatusLabel("Download interrupted"))
-                .finally(() => {
-                    musicState.downloading = false;
-                    setTimeout(updateMusicGlobalIndicator, 800);
-                });
-        }
-
-        function triggerTrackDownload(track) {
-            return new Promise(resolve => {
-                const anchor = document.createElement("a");
-                anchor.href = track.downloadUrl || track.url;
-                anchor.download = track.name;
-                document.body.appendChild(anchor);
-                anchor.click();
-                document.body.removeChild(anchor);
-                updateTrackStatus(track, "Download started");
-                setTimeout(() => {
-                    updateTrackStatus(track, "Downloaded");
-                    resolve();
-                }, 400);
-            });
-        }
-
-        function updateTrackStatus(track, text) {
-            track.status = text;
-            if (track.downloadStatusEl) {
-                track.downloadStatusEl.textContent = text;
-            }
-        }
-
-        function removeTrackFromState(id) {
-            musicState.tracks = musicState.tracks.filter(track => track.id !== id);
-            musicState.selectedIds.delete(id);
-            if (musicState.currentId === id) {
-                musicState.currentId = null;
-            }
-            renderMusicTracks();
-        }
-
-        function deleteMusicTrack(id, options = {}) {
-            if (options.skipServer) {
-                removeTrackFromState(id);
-                return Promise.resolve();
-            }
-            return fetch(`/music_tracks/${id}`, { method: "DELETE" })
-                .then(res => {
-                    if (!res.ok) throw new Error("delete failed");
-                    removeTrackFromState(id);
-                })
-                .catch(() => updateMusicStatusLabel("Could not delete track"));
-        }
-
-        function updateMusicSelection(id, checked) {
-            if (checked) {
-                musicState.selectedIds.add(id);
-            } else {
-                musicState.selectedIds.delete(id);
-            }
-        }
-
-        function updateMusicGlobalIndicator() {
-            const fill = document.getElementById("musicProgressFill");
-            const label = document.getElementById("musicProgressLabel");
-            const total = musicState.tracks.length;
-            if (!label || !fill) return;
-            if (total === 0) {
-                label.textContent = "0 / 0";
-                fill.style.width = "0%";
-                return;
-            }
-            const idx = musicState.tracks.findIndex(track => track.id === musicState.currentId);
-            const display = idx >= 0 ? idx + 1 : 0;
-            label.textContent = `${display} / ${total}`;
-            fill.style.width = `${(display / total) * 100}%`;
-        }
-
-        function updateMusicSectionStatus() {
-            const status = document.getElementById("musicLibraryStatus");
-            if (!status) return;
-            const total = musicState.tracks.length;
-            status.textContent = total === 0 ? "Upload a music file to preview it here" : `${total} track${total === 1 ? "" : "s"} ready`;
-        }
-
-        function ensureMusicSectionVisibility() {
-            const section = document.getElementById("musicSection");
-            if (!section) return;
-            section.hidden = musicState.tracks.length === 0;
-        }
-
-        function updateMusicStatusLabel(text) {
-            const status = document.getElementById("musicLibraryStatus");
-            if (status) status.textContent = text;
-        }
-
-        function playNextMusic(refId) {
-            if (musicState.tracks.length === 0) return;
-            const currentId = refId || musicState.currentId;
-            let idx = musicState.tracks.findIndex(track => track.id === currentId);
-            if (idx === -1) {
-                idx = musicState.tracks.findIndex(track => track.id === musicState.currentId);
-            }
-            const nextIdx = (idx >= 0 && idx + 1 < musicState.tracks.length) ? idx + 1 : -1;
-            if (nextIdx >= 0) {
-                const nextTrack = musicState.tracks[nextIdx];
-                playMusicTrack(nextTrack);
-            } else {
-                musicState.currentId = null;
-                updateMusicButtons();
-                updateMusicGlobalIndicator();
-            }
         }
 
 
@@ -5892,86 +5952,88 @@ rememberActiveIndex();
         });
 
         /* Init */
-      window.onload = function () {
-    // Restore Theme
-    if (localStorage.getItem('theme') === 'dark') {
-        document.body.classList.add('dark-mode');
-    }
-
-    // Restore Background
-    if (localStorage.getItem('hide-bg') === 'true') {
-        document.body.classList.add('hide-bg');
-    }
-
-    // Fetch doc list from backend and open last opened doc only
-    (async function() {
-        try {
-            const lRes = await fetch('/list');
-            const files = await lRes.json();
-            if (files.length > 0) {
-                // Build docs map from server list
-                docs = {};
-                files.forEach(f => { docs[f] = null; });
-                closedDocs = closedDocs.filter(d => docs[d] !== undefined);
-                saveClosedDocs();
-
-                // Only open if user previously had a doc open
-                const stored = localStorage.getItem("currentDoc");
-                if (stored && docs[stored] !== undefined && !isClosedDoc(stored)) {
-                    current = stored;
-                    renderTabs();
-                    await openDoc(current);
-                } else {
-                    current = null;
-                    renderTabs();
-                    article.innerHTML = "";
-                    article.contentEditable = "false";
-                    status.textContent = "Ready";
-                }
-            } else {
-                closedDocs = [];
-                saveClosedDocs();
-                current = null;
-                localStorage.removeItem("currentDoc");
-                article.innerHTML = "";
-                article.contentEditable = "false";
-                renderTabs();
-                status.textContent = "Ready";
+        window.onload = function () {
+            // Restore Theme
+            const storedTheme = localStorage.getItem("theme");
+            if (storedTheme === "dark" || storedTheme === "light") {
+                applyTheme(storedTheme, { notify: false });
             }
-        } catch (e) {
-            article.innerHTML = "";
-            status.textContent = "Ready: No document";
-        }
-        lucide.createIcons();
-        syncWithServer();
-    })();
-};
+
+            // Restore Background
+            if (localStorage.getItem('hide-bg') === 'true') {
+                document.body.classList.add('hide-bg');
+            }
+
+            // Fetch doc list from backend and open last opened doc only
+            (async function () {
+                try {
+                    const lRes = await fetch('/list');
+                    const files = await lRes.json();
+                    if (files.length > 0) {
+                        // Build docs map from server list
+                        docs = {};
+                        files.forEach(f => { docs[f] = null; });
+                        closedDocs = closedDocs.filter(d => docs[d] !== undefined);
+                        saveClosedDocs();
+
+                        // Only open if user previously had a doc open
+                        const stored = localStorage.getItem("currentDoc");
+                        if (stored && docs[stored] !== undefined && !isClosedDoc(stored)) {
+                            current = stored;
+                            renderTabs();
+                            await openDoc(current);
+                        } else {
+                            current = null;
+                            renderTabs();
+                            article.innerHTML = "";
+                            article.contentEditable = "false";
+                            status.textContent = "Ready";
+                        }
+                    } else {
+                        closedDocs = [];
+                        saveClosedDocs();
+                        current = null;
+                        localStorage.removeItem("currentDoc");
+                        article.innerHTML = "";
+                        article.contentEditable = "false";
+                        renderTabs();
+                        status.textContent = "Ready";
+                    }
+                } catch (e) {
+                    article.innerHTML = "";
+                    status.textContent = "Ready: No document";
+                }
+                lucide.createIcons();
+                syncWithServer();
+                bindVideoUploader();
+            })();
+        };
 
         async function syncWithServer() {
             if (isSyncing) return;
             isSyncing = true;
 
             try {
-            const res = await fetch("/last_modified");
-            const m = await res.json();
+                const res = await fetch("/last_modified");
+                const m = await res.json();
 
-            if (m.last_mod !== lastSyncTime) {
-                const lRes = await fetch("/list");
-                let files = await lRes.json();
+                if (m.last_mod !== lastSyncTime) {
+                    const lRes = await fetch("/list");
+                    let files = await lRes.json();
 
                     // Remove docs no longer on server
                     Object.keys(docs).forEach(d => {
                         if (!files.includes(d)) delete docs[d];
                     });
 
-                // Add new files as null (unloaded)
-                files.forEach(f => {
-                    if (!docs[f]) docs[f] = null;
-                });
+                    // Add new files as null (unloaded)
+                    files.forEach(f => {
+                        if (!docs[f]) docs[f] = null;
+                    });
 
-                // Clean up closed docs that no longer exist
-                closedDocs = closedDocs.filter(d => docs[d] !== undefined);
-                saveClosedDocs();
+                    // Clean up closed docs that no longer exist
+                    closedDocs = closedDocs.filter(d => docs[d] !== undefined);
+                    saveClosedDocs();
 
                     // Fetch and display content for current doc if not loaded
                     if (current && (docs[current] === null || docs[current] === undefined)) {
