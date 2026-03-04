@@ -1960,7 +1960,7 @@ body.dark-mode .music-subtext {
         }
 
         .local-video-controls {
-            display: none;
+            display: flex;
             align-items: center;
             justify-content: center;
             gap: 16px;
@@ -3808,7 +3808,7 @@ body.dark-mode .music-subtext {
 
         function setupLocalVideoPreview(video) {
             if (!video) return;
-            video.removeAttribute("controls");
+            video.setAttribute("controls", "");
             video.setAttribute("preload", "metadata");
             const audioAllowed = localStorage.getItem('localVideoAudio') === 'true';
             video.muted = !audioAllowed;
