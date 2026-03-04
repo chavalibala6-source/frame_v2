@@ -2073,7 +2073,8 @@ body.dark-mode .music-subtext {
             filter: brightness(1.05);
         }
 
-        .indicators {
+        .indicators,
+        .indicator-bar {
             display: flex;
             align-items: center;
             gap: 8px;
@@ -4765,32 +4766,32 @@ function initLocalVideoSection() {
 
         /* Carousel UI Helpers */
         function renderIndicators(container, rowSelector) {
-    const carousel = container || document.querySelector('.video-carousel-container');
-    if (!carousel) return;
+            const carousel = container || document.querySelector('.video-carousel-container');
+            if (!carousel) return;
 
-    const rows = carousel.querySelectorAll(rowSelector || '.video-row');
-    let indicatorBar = carousel.querySelector('.indicator-bar');
+            const rows = carousel.querySelectorAll(rowSelector || '.video-row');
+            let indicatorBar = carousel.querySelector('.indicators') || carousel.querySelector('.indicator-bar');
 
-    if (!indicatorBar) {
-        indicatorBar = document.createElement('div');
-        indicatorBar.className = 'indicator-bar';
-        container.appendChild(indicatorBar);
-    }
+            if (!indicatorBar) {
+                indicatorBar = document.createElement('div');
+                indicatorBar.className = 'indicator-bar';
+                carousel.appendChild(indicatorBar);
+            }
 
-    indicatorBar.innerHTML = '';
+            indicatorBar.innerHTML = '';
 
-    rows.forEach((_, index) => {
-        const dot = document.createElement('div');
-        dot.className = 'dot' + (index === 0 ? ' active' : '');
-        dot.dataset.index = index;
+            rows.forEach((_, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'dot' + (index === 0 ? ' active' : '');
+                dot.dataset.index = index;
 
-        const fill = document.createElement('div');
-        fill.className = 'dot-fill';
+                const fill = document.createElement('div');
+                fill.className = 'dot-fill';
 
-        dot.appendChild(fill);
-        indicatorBar.appendChild(dot);
-    });
-}
+                dot.appendChild(fill);
+                indicatorBar.appendChild(dot);
+            });
+        }
 
         let _lastActiveIndex = 0;
         let _activeContainer = null;
