@@ -1924,7 +1924,7 @@ body.dark-mode .music-subtext {
         }
 
         .video-controls {
-            display: none;
+            display: contents;
             align-items: center;
             justify-content: center;
             gap: 16px;
@@ -2201,19 +2201,47 @@ body.dark-mode .music-subtext {
         /* =====================================================
    VIDEO CONTAINER – DEFAULT (NO CUT)
 ===================================================== */
-        .video-container {
-            position: relative;
-            flex: 1 0 100%;
-            min-width: 100%;
-            width: 100%;
-            max-width: 100%;
-            padding: 15px;
-            /* Added Padding */
-            box-sizing: border-box;
+       .video-container {
+  position: relative;
+  flex: 1 0 100%;
+  width: 100%;
+  max-width: 100%;
+  min-width: 100%;
 
-            scroll-snap-align: center;
-            scroll-snap-stop: always;
-        }
+  padding: 24px 10px;
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem; /* Better scalable spacing */
+
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+
+  scroll-margin: 20px; /* Prevent snapping flush to edges */
+
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* Optional: Smooth scaling effect when active */
+.video-container.active {
+  transform: scale(1.02);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .video-container {
+    padding: 16px 12px;
+    gap: 1.5rem;
+  }
+}
+
+/* Optional: Improve performance for scroll snapping */
+.video-container {
+  will-change: transform;
+}
 
         .upload-progress {
             position: absolute;
