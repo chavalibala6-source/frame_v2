@@ -4769,7 +4769,7 @@ function initLocalVideoSection() {
             const carousel = container || document.querySelector('.video-carousel-container');
             if (!carousel) return;
 
-            const rows = carousel.querySelectorAll(rowSelector || '.video-row');
+            const row = carousel.querySelector(rowSelector || '.video-row');
             let indicatorBar = carousel.querySelector('.indicators') || carousel.querySelector('.indicator-bar');
 
             if (!indicatorBar) {
@@ -4780,10 +4780,16 @@ function initLocalVideoSection() {
 
             indicatorBar.innerHTML = '';
 
-            rows.forEach((_, index) => {
+            if (!row) return;
+            const containers = row.querySelectorAll('.video-container');
+            containers.forEach((container, index) => {
                 const dot = document.createElement('div');
                 dot.className = 'dot' + (index === 0 ? ' active' : '');
                 dot.dataset.index = index;
+                dot.onclick = () => {
+                    const scrollAmount = container.offsetLeft - row.offsetLeft;
+                    row.scrollTo({ left: scrollAmount, behavior: 'smooth' });
+                };
 
                 const fill = document.createElement('div');
                 fill.className = 'dot-fill';
