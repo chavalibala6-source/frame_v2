@@ -311,11 +311,16 @@ def upload_image():
     dest_path = os.path.join(UPLOAD_DIR, unique_name)
     file.save(dest_path)
 
+    base_url = get_public_base_url()
+    return jsonify({"url": f"{base_url}/static/uploads/{unique_name}"})
+
+
+def get_public_base_url():
     host = request.host
     scheme = request.headers.get("X-Forwarded-Proto", request.scheme)
     if host == "noteslook.lan" and scheme == "https":
         host = "noteslook.lan:8443"
-    return jsonify({"url": f"{scheme}://{host}/static/uploads/{unique_name}"})
+    return f"{scheme}://{host}"
 
 
 @app.route("/upload_file", methods=["POST", "OPTIONS"])
@@ -342,12 +347,9 @@ def upload_file():
     file.save(dest_path)
 
     size = os.path.getsize(dest_path)
-    host = request.host
-    scheme = request.headers.get("X-Forwarded-Proto", request.scheme)
-    if host == "noteslook.lan" and scheme == "https":
-        host = "noteslook.lan:8443"
-    download_endpoint = f"{scheme}://{host}/download_file/{storage_name}?name={secure_filename(safe_name)}"
-    public_url = f"{scheme}://{host}/static/uploads/files/{storage_name}"
+    base_url = get_public_base_url()
+    download_endpoint = f"{base_url}/download_file/{storage_name}?name={secure_filename(safe_name)}"
+    public_url = f"{base_url}/static/uploads/files/{storage_name}"
 
     doc_name = request.args.get("doc") or request.form.get("doc") or "global"
 
@@ -385,21 +387,22 @@ def list_music_tracks():
     with get_db() as conn:
         with conn.cursor() as cur:
             cur.execute("""
-                SELECT id, original_name, url, download_url, size, mime, uploaded_at
+                SELECT id, original_name, storage_name, size, mime, uploaded_at
                 FROM music_tracks
                 WHERE doc_name = %s
                 ORDER BY uploaded_at ASC
             """, (doc_name,))
             rows = cur.fetchall()
+    base_url = get_public_base_url()
     return jsonify([
         {
             "id": row[0],
             "name": row[1],
-            "url": row[2],
-            "download_url": row[3],
-            "size": row[4],
-            "mime": row[5],
-            "uploaded_at": row[6].isoformat() if row[6] else None
+            "url": f"{base_url}/static/uploads/files/{row[2]}",
+            "download_url": f"{base_url}/download_file/{row[2]}?name={secure_filename(row[1] or '')}",
+            "size": row[3],
+            "mime": row[4],
+            "uploaded_at": row[5].isoformat() if row[5] else None
         }
         for row in rows
     ])
