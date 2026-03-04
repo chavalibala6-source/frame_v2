@@ -2133,22 +2133,7 @@ body.dark-mode .music-subtext {
 
 
         /* Controls Pill (holds play button + progress) */
-        .video-controls-pill {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            padding: 8px 16px;
-            border-radius: 999px;
-            flex: 1;
-            min-width: 220px;
-            max-width: 420px;
-            align-self: center;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
-            backdrop-filter: blur(6px) saturate(120%);
-        }
+        /* removed .video-controls-pill */
 
         /* Dot base and fill — active dot becomes horizontal pill */
         .dot {
@@ -3138,9 +3123,7 @@ body.dark-mode .music-subtext {
                         const controls = document.createElement("div");
                         controls.className = "video-controls";
                         controls.innerHTML = `
-                            <div class="video-controls-pill">
-                                    <div class="indicators"></div>
-                                </div>
+                            <div class="indicators"></div>
                             <button class="play-btn" onclick="togglePlayPause(this)" title="Play/Pause">
                                 <i data-lucide="play"></i>
                             </button>
@@ -3252,9 +3235,7 @@ body.dark-mode .music-subtext {
                         const controls = document.createElement("div");
                         controls.className = "video-controls local-video-controls";
                         controls.innerHTML = `
-                            <div class="video-controls-pill">
-                                <div class="local-indicators"></div>
-                            </div>
+                            <div class="local-indicators"></div>
                             <button class="play-btn" id="localPlayBtn" onclick="toggleLocalPlayPause()" title="Play/Pause">
                                 <i data-lucide="play"></i>
                             </button>
@@ -3769,9 +3750,7 @@ body.dark-mode .music-subtext {
             const controls = document.createElement("div");
             controls.className = "video-controls";
             controls.innerHTML = `
-                <div class="video-controls-pill">
-                    <div class="indicators"></div>
-                </div>
+                <div class="indicators"></div>
                 <button class="play-btn" onclick="togglePlayPause(this)" title="Play/Pause">
                     <i data-lucide="play"></i>
                 </button>
@@ -3807,9 +3786,7 @@ body.dark-mode .music-subtext {
             const controls = document.createElement("div");
             controls.className = "video-controls local-video-controls";
             controls.innerHTML = `
-                <div class="video-controls-pill">
-                    <div class="local-indicators"></div>
-                </div>
+                <div class="local-indicators"></div>
                 <button class="play-btn" onclick="toggleLocalPlayPause()" title="Play/Pause">
                     <i data-lucide="play"></i>
                 </button>
