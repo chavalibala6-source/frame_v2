@@ -2152,7 +2152,7 @@ body.dark-mode .music-subtext {
 
         /* Dot base and fill — active dot becomes horizontal pill */
         .dot {
-            display: none;
+            display: inline-flex;
             position: relative;
             width: 8px;
             height: 8px;
@@ -4990,6 +4990,9 @@ rememberActiveIndex();
             const row = container.querySelector('.local-video-row');
             const hasVideos = row && row.querySelectorAll('.video-container').length > 0;
             container.style.display = hasVideos ? '' : 'none';
+            if (hasVideos) {
+                renderLocalIndicators();
+            }
         }
 
         function toggleLocalPlayPause() {
