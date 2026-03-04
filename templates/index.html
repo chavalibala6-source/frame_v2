@@ -1924,11 +1924,11 @@ body.dark-mode .music-subtext {
         }
 
         .video-controls {
-            display: flex;
+            display: none;
             align-items: center;
-            justify-content: flex-end;
-            gap: 24px;
-            padding: 12px 24px;
+            justify-content: center;
+            gap: 16px;
+            padding: 12px 22px;
 
             /* Adaptive glass background */
             background: var(--controls-bg);
@@ -1946,7 +1946,8 @@ body.dark-mode .music-subtext {
                 var(--controls-inset);
 
             max-height: 60px;
-            margin-bottom: 0;
+            margin: 6px auto 0;
+            width: min(680px, calc(100% - 40px));
 
             /* Smooth interaction */
             transition:
@@ -1959,11 +1960,11 @@ body.dark-mode .music-subtext {
         }
 
         .local-video-controls {
-            display: flex;
+            display: none;
             align-items: center;
-            justify-content: flex-end;
-            gap: 24px;
-            padding: 12px 24px;
+            justify-content: center;
+            gap: 16px;
+            padding: 12px 22px;
             background: var(--controls-bg);
             backdrop-filter: blur(20px) saturate(120%);
             -webkit-backdrop-filter: blur(20px) saturate(120%);
@@ -1973,9 +1974,9 @@ body.dark-mode .music-subtext {
                 var(--controls-shadow),
                 var(--controls-inset);
             max-height: 60px;
-            margin-bottom: 0;
-            opacity: 0.75;
-            transform: translateY(6px);
+            margin: 6px auto 0;
+            opacity: 0.85;
+            transform: translateY(4px);
             flex-wrap: nowrap;
         }
 
@@ -2091,7 +2092,7 @@ body.dark-mode .music-subtext {
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .dot.active {
+       /* .dot.active {
             width: 48px;
             height: 10px;
             border-radius: 999px;
@@ -2135,18 +2136,23 @@ body.dark-mode .music-subtext {
         .video-controls-pill {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 8px 14px;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 16px;
             border-radius: 999px;
-            /* background: var(--pill-bg); */
-            /* border: 1px solid var(--pill-border); */
-            margin-right: auto;
-            /* box-shadow: rgba(255, 255, 255, 0.03) 0px 1px 0px inset; */
+            flex: 1;
+            min-width: 220px;
+            max-width: 420px;
             align-self: center;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(6px) saturate(120%);
         }
 
         /* Dot base and fill — active dot becomes horizontal pill */
         .dot {
+            display: none;
             position: relative;
             width: 8px;
             height: 8px;
@@ -2174,7 +2180,7 @@ body.dark-mode .music-subtext {
         }
 
         .dot.active {
-            width: 45px;
+            width: 36px;
             height: 10px;
             border-radius: 999px;
             background: rgba(0, 2, 8, 0.27);
@@ -2829,7 +2835,9 @@ body.dark-mode .music-subtext {
         let isDirty = false;
         function deleteVideo(btn) {
             if (!confirm("Delete this video?")) return;
-            btn.closest(".video-container").remove();
+            const removed = btn.closest(".video-container");
+            if (removed) removed.remove();
+            refreshLocalVideoUI();
             saveServer();
         }
         /* Tabs & Docs Logic */
@@ -3167,7 +3175,8 @@ body.dark-mode .music-subtext {
                         }
                     });
 
-                    renderIndicators();
+                    const ytCarousel = document.querySelector('.video-carousel-container');
+                    renderIndicators(ytCarousel, '.video-row');
                     lucide.createIcons();
                     scheduleDeleteHide();
                     ensureVideoObserver();
@@ -3238,6 +3247,7 @@ body.dark-mode .music-subtext {
                     renderLocalIndicators();
                     lucide.createIcons();
                     rewriteLocalUrlsInDom(localContainer);
+                    refreshLocalVideoUI();
                 }
 
                 // FIX: Legacy nesting (article inside article)
@@ -3764,6 +3774,7 @@ body.dark-mode .music-subtext {
             });
 
             lucide.createIcons();
+            refreshLocalVideoUI();
             return row;
         }
 
@@ -4725,11 +4736,12 @@ function initLocalVideoSection() {
         }, { passive: true });
 
         /* Carousel UI Helpers */
-       function renderIndicators(container, rowSelector) {
-    if (!container) return;
+        function renderIndicators(container, rowSelector) {
+    const carousel = container || document.querySelector('.video-carousel-container');
+    if (!carousel) return;
 
-    const rows = container.querySelectorAll(rowSelector);
-    let indicatorBar = container.querySelector('.indicator-bar');
+    const rows = carousel.querySelectorAll(rowSelector || '.video-row');
+    let indicatorBar = carousel.querySelector('.indicator-bar');
 
     if (!indicatorBar) {
         indicatorBar = document.createElement('div');
@@ -4741,7 +4753,7 @@ function initLocalVideoSection() {
 
     rows.forEach((_, index) => {
         const dot = document.createElement('div');
-        dot.className = 'indicator-dot';
+        dot.className = 'dot' + (index === 0 ? ' active' : '');
         dot.dataset.index = index;
 
         const fill = document.createElement('div');
@@ -4850,11 +4862,12 @@ rememberActiveIndex();
         }
 
         function updateIndicators() {
-            const row = document.querySelector('.video-row');
-            const indicators = document.querySelectorAll('.dot');
+            const carouselContainer = document.querySelector('.video-carousel-container');
+            const row = carouselContainer ? carouselContainer.querySelector('.video-row') : document.querySelector('.video-row');
+            const indicators = carouselContainer ? carouselContainer.querySelectorAll('.dot') : document.querySelectorAll('.dot');
             if (!row) return;
             if (indicators.length === 0) {
-                renderIndicators();
+                renderIndicators(carouselContainer, '.video-row');
                 return;
             }
 
@@ -4883,7 +4896,7 @@ rememberActiveIndex();
             });
 
             // Update the active dot fill from player state
-            updatePillProgress();
+            updatePillProgress(carouselContainer, '.video-row', '.video-container');
         }
 
         function renderLocalIndicators() {
@@ -4941,6 +4954,14 @@ rememberActiveIndex();
             }
             const pct = Math.max(0, Math.min(100, (video.currentTime / video.duration) * 100));
             activeFill.style.width = pct + '%';
+        }
+
+        function refreshLocalVideoUI() {
+            const container = document.querySelector('.local-video-carousel-container');
+            if (!container) return;
+            const row = container.querySelector('.local-video-row');
+            const hasVideos = row && row.querySelectorAll('.video-container').length > 0;
+            container.style.display = hasVideos ? '' : 'none';
         }
 
         function toggleLocalPlayPause() {
@@ -5183,7 +5204,7 @@ rememberActiveIndex();
                 }
             }
 
-                            const row = getOrCreateLocalVideoCarousel();
+                            const row = getOrCreateVideoCarousel();
 
             // Create the container
             // We use 'allow-popups' etc to ensure playlist UI works well
