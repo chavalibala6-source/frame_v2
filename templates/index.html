@@ -4548,6 +4548,55 @@ body.dark-mode .music-subtext {
             applyEpubSelectionUI();
         }
 
+        function invertEpubSelection() {
+            const row = document.querySelector('.epub-row');
+            if (!row) return;
+            epubState.selectMode = true;
+            const next = new Set();
+            row.querySelectorAll('.epub-embed').forEach(card => {
+                const id = ensureEpubCardId(card);
+                if (!epubState.selectedIds.has(id)) {
+                    next.add(id);
+                }
+            });
+            epubState.selectedIds = next;
+            applyEpubSelectionUI();
+        }
+
+        function getSelectedEpubCards() {
+            const row = document.querySelector('.epub-row');
+            if (!row) return [];
+            return Array.from(row.querySelectorAll('.epub-embed')).filter(card => epubState.selectedIds.has(ensureEpubCardId(card)));
+        }
+
+        function downloadEpubCards(cards) {
+            if (!cards || cards.length === 0) return;
+            cards.forEach(card => {
+                const link = card.querySelector('.epub-tools a[download]');
+                if (!link) return;
+                const anchor = document.createElement('a');
+                anchor.href = link.href;
+                anchor.download = link.getAttribute('download') || '';
+                document.body.appendChild(anchor);
+                anchor.click();
+                document.body.removeChild(anchor);
+            });
+        }
+
+        function downloadSelectedEpubCards() {
+            const cards = getSelectedEpubCards();
+            if (!cards.length) return;
+            downloadEpubCards(cards);
+        }
+
+        function downloadAllEpubCards() {
+            const row = document.querySelector('.epub-row');
+            if (!row) return;
+            const cards = Array.from(row.querySelectorAll('.epub-embed'));
+            if (!cards.length) return;
+            downloadEpubCards(cards);
+        }
+
         function deleteSelectedEpubCards() {
             const row = document.querySelector('.epub-row');
             if (!row) return;
@@ -4560,7 +4609,7 @@ body.dark-mode .music-subtext {
             selected.forEach(card => card.remove());
             epubState.selectedIds.clear();
             epubState.selectMode = false;
-            if (row.children.length === 0) row.parentElement?.remove();
+            refreshEpubShelfUI();
             applyEpubSelectionUI();
             saveServer();
         }
@@ -4572,8 +4621,17 @@ body.dark-mode .music-subtext {
             row.innerHTML = "";
             epubState.selectedIds.clear();
             epubState.selectMode = false;
-            row.parentElement?.remove();
+            refreshEpubShelfUI();
             saveServer();
+        }
+
+        function refreshEpubShelfUI() {
+            const row = document.querySelector('.epub-row');
+            if (!row) return;
+            if (row.children.length > 0) return;
+            row.parentElement?.remove();
+            epubState.selectedIds.clear();
+            epubState.selectMode = false;
         }
 
         function bindEpubShelfControls(container) {
@@ -4581,8 +4639,11 @@ body.dark-mode .music-subtext {
             container.dataset.controlsBound = "true";
             container.querySelector('#epubSelectModeBtn')?.addEventListener('click', toggleEpubSelectMode);
             container.querySelector('#epubSelectAllBtn')?.addEventListener('click', selectAllEpubCards);
+            container.querySelector('#epubInvertSelectionBtn')?.addEventListener('click', invertEpubSelection);
             container.querySelector('#epubDeleteSelectedBtn')?.addEventListener('click', deleteSelectedEpubCards);
             container.querySelector('#epubDeleteAllBtn')?.addEventListener('click', deleteAllEpubCards);
+            container.querySelector('#epubDownloadSelectedBtn')?.addEventListener('click', downloadSelectedEpubCards);
+            container.querySelector('#epubDownloadAllBtn')?.addEventListener('click', downloadAllEpubCards);
         }
 
         function getOrCreateEpubShelf() {
@@ -4599,8 +4660,11 @@ body.dark-mode .music-subtext {
                     <div class="epub-controls">
                         <button class="epub-nav-btn" id="epubSelectModeBtn">Select</button>
                         <button class="epub-nav-btn" id="epubSelectAllBtn">Select All</button>
+                        <button class="epub-nav-btn" id="epubInvertSelectionBtn">Invert</button>
                         <button class="epub-nav-btn" id="epubDeleteSelectedBtn">Delete Selected</button>
                         <button class="epub-nav-btn" id="epubDeleteAllBtn">Delete All</button>
+                        <button class="epub-nav-btn" id="epubDownloadSelectedBtn">Download Selected</button>
+                        <button class="epub-nav-btn" id="epubDownloadAllBtn">Download All</button>
                     </div>
                 `;
             }
@@ -4661,12 +4725,10 @@ body.dark-mode .music-subtext {
             const id = ensureEpubCardId(card);
             epubState.selectedIds.delete(id);
             card.remove();
-            if (row && row.children.length === 0) {
-                row.parentElement?.remove();
-                epubState.selectMode = false;
-            } else {
+            if (row && row.children.length > 0) {
                 applyEpubSelectionUI();
             }
+            refreshEpubShelfUI();
             saveServer();
         }
 
