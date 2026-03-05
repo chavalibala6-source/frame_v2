@@ -1192,6 +1192,75 @@ body.dark-mode .music-subtext {
             display: none;
         }
 
+        .music-upload-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 1200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(8, 10, 14, 0.35);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 16px;
+        }
+
+        .music-upload-modal.show {
+            display: flex;
+        }
+
+        .music-upload-card {
+            width: min(540px, 100%);
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            background: rgba(255, 255, 255, 0.82);
+            box-shadow: 0 20px 56px rgba(0, 0, 0, 0.28);
+            padding: 16px 16px 14px;
+        }
+
+        .music-upload-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .music-upload-close {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 0, 0, 0.14);
+            background: rgba(255, 255, 255, 0.92);
+            color: #111827;
+            cursor: pointer;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .music-upload-progress-track {
+            width: 100%;
+            height: 10px;
+            border-radius: 999px;
+            background: rgba(0, 0, 0, 0.12);
+            overflow: hidden;
+        }
+
+        .music-upload-progress-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #0ea5e9, #22d3ee);
+            transition: width 0.15s linear;
+        }
+
+        .music-upload-meta {
+            margin-top: 10px;
+            font-size: 12px;
+            color: rgba(17, 24, 39, 0.82);
+        }
+
         .modal-header {
             display: flex;
             justify-content: space-between;
@@ -3249,6 +3318,18 @@ body.dark-mode .music-subtext {
         <div class="footer">
             <span id="status">Ready</span>
             <span id="count" style="display:none;">0 lines</span>
+        </div>
+    </div>
+    <div class="music-upload-modal" id="musicUploadModal" aria-live="polite">
+        <div class="music-upload-card">
+            <div class="music-upload-header">
+                <span id="musicUploadTitle">Uploading music</span>
+                <button class="music-upload-close" id="musicUploadCloseBtn" title="Close">✕</button>
+            </div>
+            <div class="music-upload-progress-track">
+                <div class="music-upload-progress-fill" id="musicUploadFill"></div>
+            </div>
+            <div class="music-upload-meta" id="musicUploadMeta">0%</div>
         </div>
     </div>
     <script>
@@ -6504,7 +6585,17 @@ rememberActiveIndex();
             selectMode: false,
             selectedIds: new Set(),
             downloading: false,
+            uploading: false,
             docName: "global"
+        };
+
+        const musicUploadState = {
+            hiddenByUser: false,
+            totalFiles: 0,
+            completedFiles: 0,
+            totalBytes: 0,
+            completedBytes: 0,
+            inFlight: {}
         };
 
         function buildTrackFromPayload(payload) {
@@ -6565,26 +6656,89 @@ rememberActiveIndex();
             helpers.downloadAll?.addEventListener("click", () => handleMusicDownloads([...musicState.tracks]));
             ensureMusicSectionVisibility();
             loadMusicForDoc(current || "global");
+
+            document.getElementById("musicUploadCloseBtn")?.addEventListener("click", () => {
+                musicUploadState.hiddenByUser = true;
+                hideMusicUploadModal();
+            });
         }
 
-        function handleMusicUpload(event) {
+        function showMusicUploadModal() {
+            if (musicUploadState.hiddenByUser) return;
+            document.getElementById("musicUploadModal")?.classList.add("show");
+        }
+
+        function hideMusicUploadModal() {
+            document.getElementById("musicUploadModal")?.classList.remove("show");
+        }
+
+        function updateMusicUploadModal() {
+            const fill = document.getElementById("musicUploadFill");
+            const meta = document.getElementById("musicUploadMeta");
+            const title = document.getElementById("musicUploadTitle");
+            if (!fill || !meta || !title) return;
+            const inFlightLoaded = Object.values(musicUploadState.inFlight).reduce((sum, n) => sum + (Number(n) || 0), 0);
+            const uploaded = musicUploadState.completedBytes + inFlightLoaded;
+            const total = Math.max(1, musicUploadState.totalBytes);
+            const pct = Math.max(0, Math.min(100, Math.round((uploaded / total) * 100)));
+            fill.style.width = `${pct}%`;
+            title.textContent = musicState.uploading ? "Uploading music" : "Upload complete";
+            meta.textContent = `${musicUploadState.completedFiles}/${musicUploadState.totalFiles} files • ${formatBytes(uploaded)} / ${formatBytes(musicUploadState.totalBytes)} • ${pct}%`;
+        }
+
+        async function handleMusicUpload(event) {
             const files = Array.from(event.target?.files || []);
             if (!files.length) return;
+            musicState.uploading = true;
+            musicUploadState.hiddenByUser = false;
+            musicUploadState.totalFiles = files.length;
+            musicUploadState.completedFiles = 0;
+            musicUploadState.totalBytes = files.reduce((sum, f) => sum + (Number(f.size) || 0), 0);
+            musicUploadState.completedBytes = 0;
+            musicUploadState.inFlight = {};
+
+            showMusicUploadModal();
+            updateMusicUploadModal();
             updateMusicStatusLabel(`Uploading ${files.length} track${files.length > 1 ? "s" : ""}...`);
-            (async () => {
-                for (const file of files) {
-                    await uploadMusicFile(file);
-                }
-                event.target.value = "";
-                updateMusicStatusLabel(`${musicState.tracks.length} track${musicState.tracks.length === 1 ? "" : "s"} ready`);
-            })();
+
+            const batchSize = 4;
+            for (let i = 0; i < files.length; i += batchSize) {
+                const batch = files.slice(i, i + batchSize);
+                await Promise.all(batch.map((file, idx) => {
+                    const key = `${i + idx}:${file.name}`;
+                    return uploadMusicFile(file, {
+                        onProgress: (loaded) => {
+                            musicUploadState.inFlight[key] = loaded;
+                            updateMusicUploadModal();
+                        },
+                        onComplete: () => {
+                            musicUploadState.completedFiles += 1;
+                            musicUploadState.completedBytes += Number(file.size) || 0;
+                            delete musicUploadState.inFlight[key];
+                            updateMusicUploadModal();
+                        }
+                    });
+                }));
+            }
+
+            musicState.uploading = false;
+            updateMusicUploadModal();
+            setTimeout(() => {
+                hideMusicUploadModal();
+            }, 900);
+            event.target.value = "";
+            updateMusicStatusLabel(`${musicState.tracks.length} track${musicState.tracks.length === 1 ? "" : "s"} ready`);
         }
 
-        function uploadMusicFile(file) {
+        function uploadMusicFile(file, hooks = {}) {
             return new Promise(resolve => {
                 const xhr = new XMLHttpRequest();
                 const docParam = encodeURIComponent(musicState.docName || current || "global");
                 xhr.open("POST", `/upload_file?doc=${docParam}`, true);
+                xhr.upload.onprogress = function (evt) {
+                    if (!evt.lengthComputable) return;
+                    hooks.onProgress?.(evt.loaded, evt.total);
+                };
                 xhr.onload = function () {
                     if (xhr.status >= 200 && xhr.status < 300) {
                         try {
@@ -6596,10 +6750,12 @@ rememberActiveIndex();
                     } else {
                         updateMusicStatusLabel("Upload failed");
                     }
+                    hooks.onComplete?.();
                     resolve();
                 };
                 xhr.onerror = function () {
                     updateMusicStatusLabel("Upload failed");
+                    hooks.onComplete?.();
                     resolve();
                 };
                 const formData = new FormData();
