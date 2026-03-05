@@ -3411,17 +3411,7 @@ body.dark-mode .music-subtext {
                 }
 
                 if (embeddedPdfRow) {
-                    const shelf = getOrCreatePdfShelf();
-                    shelf.appendChild(embeddedPdfRow);
-                    embeddedPdfRow.querySelectorAll('.pdf-embed').forEach(card => {
-                        if (!card.querySelector('.pdf-delete')) {
-                            const btn = document.createElement('button');
-                            btn.className = 'pdf-delete';
-                            btn.textContent = '✕';
-                            btn.onclick = () => deletePdfCard(btn);
-                            card.appendChild(btn);
-                        }
-                    });
+                    syncPdfShelfFromArticle();
                 }
 
                 // FIX: Legacy nesting (article inside article)
@@ -3862,6 +3852,28 @@ body.dark-mode .music-subtext {
                 notepad.insertBefore(container, notepad.firstChild);
             }
             return row;
+        }
+
+        function syncPdfShelfFromArticle() {
+            const existingPdfShelves = document.querySelectorAll('.notepad > .pdf-shelf-container');
+            existingPdfShelves.forEach(c => c.remove());
+            const existingPdfRows = document.querySelectorAll('.notepad > .pdf-row');
+            existingPdfRows.forEach(r => r.remove());
+
+            const embeddedPdfRow = article.querySelector('.pdf-row');
+            if (!embeddedPdfRow) return;
+
+            const shelf = getOrCreatePdfShelf();
+            shelf.appendChild(embeddedPdfRow);
+            embeddedPdfRow.querySelectorAll('.pdf-embed').forEach(card => {
+                if (!card.querySelector('.pdf-delete')) {
+                    const btn = document.createElement('button');
+                    btn.className = 'pdf-delete';
+                    btn.textContent = '✕';
+                    btn.onclick = () => deletePdfCard(btn);
+                    card.appendChild(btn);
+                }
+            });
         }
 
         function deletePdfCard(btn) {
@@ -6385,12 +6397,14 @@ rememberActiveIndex();
                                 const data = await res.json();
                                 docs[current] = data.content || "";
                                 article.innerHTML = docs[current];
+                                syncPdfShelfFromArticle();
                             }
                         } catch (e) {
                             article.innerHTML = "";
                         }
                     } else if (current && docs[current] !== undefined) {
                         article.innerHTML = docs[current];
+                        syncPdfShelfFromArticle();
                     }
 
                     renderTabs();
