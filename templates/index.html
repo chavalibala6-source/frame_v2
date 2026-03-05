@@ -2657,14 +2657,14 @@ body.dark-mode .music-subtext {
 
         .pdf-row {
             display: flex;
-            gap: 18px;
+            gap: 0;
             overflow-x: auto;
             overflow-y: visible;
-            padding: 0 24px;
+            padding: 0 20px;
             scroll-snap-type: x mandatory;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
-            touch-action: pan-x pan-y;
+            touch-action: auto;
             overscroll-behavior-x: contain;
         }
 
@@ -2675,9 +2675,9 @@ body.dark-mode .music-subtext {
         .pdf-embed {
             position: relative;
             margin: 0;
-            flex: 0 0 86%;
-            width: 86%;
-            max-width: 86%;
+            flex: 0 0 100%;
+            width: 100%;
+            max-width: 100%;
             border: 1px solid rgba(0, 0, 0, 0.12);
             border-radius: 16px;
             overflow: hidden;
@@ -2685,17 +2685,6 @@ body.dark-mode .music-subtext {
             box-shadow: 0 10px 28px rgba(0, 0, 0, 0.14);
             scroll-snap-align: center;
             scroll-snap-stop: always;
-            filter: blur(1.8px) saturate(0.88) brightness(0.9);
-            opacity: 0.76;
-            transform: scale(0.975);
-            transition: filter 300ms ease, opacity 300ms ease, transform 300ms ease, box-shadow 300ms ease;
-        }
-
-        .pdf-embed.is-active {
-            filter: blur(0) saturate(1) brightness(1);
-            opacity: 1;
-            transform: scale(1);
-            box-shadow: 0 14px 36px rgba(0, 0, 0, 0.2);
         }
 
         .pdf-delete {
@@ -2849,20 +2838,17 @@ body.dark-mode .music-subtext {
 
         @media (max-width: 768px) {
             .pdf-row {
-                gap: 12px;
-                padding: 0 12px;
-                overflow-x: hidden;
-                scroll-snap-type: none;
-                touch-action: pan-y;
+                gap: 0;
+                padding: 0 20px;
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                touch-action: auto;
             }
 
             .pdf-embed {
                 flex: 0 0 100%;
                 width: 100%;
                 max-width: 100%;
-                filter: none;
-                opacity: 1;
-                transform: none;
             }
 
             .pdf-frame {
@@ -2874,20 +2860,17 @@ body.dark-mode .music-subtext {
 
         @media (max-width: 1024px) and (pointer: coarse) {
             .pdf-row {
-                gap: 12px;
-                padding: 0 12px;
-                overflow-x: hidden;
-                scroll-snap-type: none;
-                touch-action: pan-y;
+                gap: 0;
+                padding: 0 20px;
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                touch-action: auto;
             }
 
             .pdf-embed {
                 flex: 0 0 100%;
                 width: 100%;
                 max-width: 100%;
-                filter: none;
-                opacity: 1;
-                transform: none;
             }
         }
     </style>
@@ -4169,6 +4152,10 @@ body.dark-mode .music-subtext {
             const shelf = getOrCreatePdfShelf();
             shelf.appendChild(embeddedPdfRow);
             embeddedPdfRow.querySelectorAll('.pdf-embed').forEach(card => {
+                const frame = card.querySelector('.pdf-frame');
+                if (frame && frame.src && frame.src.includes('#view=FitH')) {
+                    frame.src = frame.src.replace('#view=FitH', '');
+                }
                 ensurePdfCardMeta(card);
                 ensurePdfHighlightUI(card);
                 loadPdfHighlights(card);
@@ -4212,12 +4199,13 @@ body.dark-mode .music-subtext {
                     <div class="pdf-toolbar">
                         <span class="pdf-title">${safeTitle}</span>
                         <div class="pdf-tools">
+                            <a class="pdf-download-link" href="${safeUrl}" target="_blank" rel="noopener">View</a>
                             <a class="pdf-download-link" href="${safeDownload}" download="${safeTitle}" target="_blank" rel="noopener">Download PDF</a>
                             <button type="button" class="pdf-highlight-btn">Highlight</button>
                         </div>
                     </div>
                     <div class="pdf-highlight-list"></div>
-                    <iframe class="pdf-frame" src="${safeUrl}#view=FitH"></iframe>
+                    <iframe class="pdf-frame" src="${safeUrl}"></iframe>
                 </div>
             `;
             const row = getOrCreatePdfShelf();
