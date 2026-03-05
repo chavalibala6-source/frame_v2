@@ -4632,10 +4632,31 @@ body.dark-mode .music-subtext {
                 });
                 const state = { book, rendition, docName, epubName, prefs };
                 hydrateEpubToolbar(card, state);
+                if (statusEl) statusEl.textContent = "Rendering";
                 try {
-                    await rendition.display(savedPos || undefined);
+                    await Promise.race([
+                        rendition.display(savedPos || undefined),
+                        waitMs(9000)
+                    ]);
                 } catch (_) {
-                    await rendition.display();
+                    try {
+                        await Promise.race([
+                            rendition.display(),
+                            waitMs(6000)
+                        ]);
+                    } catch (_) {
+                        // Last fallback: force first spine item
+                        const firstSpine = book?.spine?.get && book.spine.get(0);
+                        const firstHref = firstSpine?.href || firstSpine?.url || null;
+                        if (firstHref) {
+                            await Promise.race([
+                                rendition.display(firstHref),
+                                waitMs(6000)
+                            ]);
+                        } else {
+                            throw new Error("render timeout");
+                        }
+                    }
                 }
                 applyEpubTheme(state);
                 if (statusEl) statusEl.textContent = "Loaded";
@@ -4672,6 +4693,12 @@ body.dark-mode .music-subtext {
             } catch {
                 return url;
             }
+        }
+
+        function waitMs(ms) {
+            return new Promise((_, reject) => {
+                setTimeout(() => reject(new Error("timeout")), ms);
+            });
         }
 
         function hydrateEpubReaders(root = document) {
