@@ -2685,6 +2685,17 @@ body.dark-mode .music-subtext {
             box-shadow: 0 10px 28px rgba(0, 0, 0, 0.14);
             scroll-snap-align: center;
             scroll-snap-stop: always;
+            filter: blur(1.8px) saturate(0.88) brightness(0.9);
+            opacity: 0.76;
+            transform: scale(0.975);
+            transition: filter 300ms ease, opacity 300ms ease, transform 300ms ease, box-shadow 300ms ease;
+        }
+
+        .pdf-embed.is-active {
+            filter: blur(0) saturate(1) brightness(1);
+            opacity: 1;
+            transform: scale(1);
+            box-shadow: 0 14px 36px rgba(0, 0, 0, 0.2);
         }
 
         .pdf-delete {
@@ -3854,7 +3865,42 @@ body.dark-mode .music-subtext {
             } else {
                 notepad.insertBefore(container, notepad.firstChild);
             }
+            row.addEventListener('scroll', () => {
+                clearTimeout(row._pdfScrollTimer);
+                row._pdfScrollTimer = setTimeout(updatePdfFocusStates, 40);
+                updatePdfFocusStates();
+            });
             return row;
+        }
+
+        function getActivePdfIndexByCenter(row) {
+            const cards = row ? row.querySelectorAll('.pdf-embed') : [];
+            if (!cards.length) return -1;
+            const rowRect = row.getBoundingClientRect();
+            const rowCenter = rowRect.left + rowRect.width / 2;
+            let bestIdx = 0;
+            let bestDist = Infinity;
+            cards.forEach((card, idx) => {
+                const rect = card.getBoundingClientRect();
+                const center = rect.left + rect.width / 2;
+                const dist = Math.abs(center - rowCenter);
+                if (dist < bestDist) {
+                    bestDist = dist;
+                    bestIdx = idx;
+                }
+            });
+            return bestIdx;
+        }
+
+        function updatePdfFocusStates() {
+            const row = document.querySelector('.pdf-row');
+            if (!row) return;
+            const cards = row.querySelectorAll('.pdf-embed');
+            if (!cards.length) return;
+            const activeIndex = getActivePdfIndexByCenter(row);
+            cards.forEach((card, idx) => {
+                card.classList.toggle('is-active', idx === activeIndex);
+            });
         }
 
         function syncPdfShelfFromArticle() {
@@ -3877,6 +3923,12 @@ body.dark-mode .music-subtext {
                     card.appendChild(btn);
                 }
             });
+            embeddedPdfRow.addEventListener('scroll', () => {
+                clearTimeout(embeddedPdfRow._pdfScrollTimer);
+                embeddedPdfRow._pdfScrollTimer = setTimeout(updatePdfFocusStates, 40);
+                updatePdfFocusStates();
+            });
+            updatePdfFocusStates();
         }
 
         function deletePdfCard(btn) {
@@ -3887,6 +3939,7 @@ body.dark-mode .music-subtext {
             if (row && row.children.length === 0) {
                 row.parentElement?.remove();
             }
+            updatePdfFocusStates();
             saveServer();
         }
 
@@ -3907,6 +3960,7 @@ body.dark-mode .music-subtext {
             `;
             const row = getOrCreatePdfShelf();
             row.insertAdjacentHTML("beforeend", block);
+            updatePdfFocusStates();
             saveServer();
         }
 
