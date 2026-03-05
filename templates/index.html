@@ -2664,7 +2664,7 @@ body.dark-mode .music-subtext {
             scroll-snap-type: x mandatory;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
-            touch-action: pan-x;
+            touch-action: pan-x pan-y;
             overscroll-behavior-x: contain;
         }
 
@@ -2848,11 +2848,47 @@ body.dark-mode .music-subtext {
         }
 
         @media (max-width: 768px) {
+            .pdf-row {
+                gap: 12px;
+                padding: 0 12px;
+                overflow-x: hidden;
+                scroll-snap-type: none;
+                touch-action: pan-y;
+            }
+
+            .pdf-embed {
+                flex: 0 0 100%;
+                width: 100%;
+                max-width: 100%;
+                filter: none;
+                opacity: 1;
+                transform: none;
+            }
+
             .pdf-frame {
                 height: clamp(320px, 70vw, 480px);
                 min-height: 320px;
             }
 
+        }
+
+        @media (max-width: 1024px) and (pointer: coarse) {
+            .pdf-row {
+                gap: 12px;
+                padding: 0 12px;
+                overflow-x: hidden;
+                scroll-snap-type: none;
+                touch-action: pan-y;
+            }
+
+            .pdf-embed {
+                flex: 0 0 100%;
+                width: 100%;
+                max-width: 100%;
+                filter: none;
+                opacity: 1;
+                transform: none;
+            }
         }
     </style>
 </head>
