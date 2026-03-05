@@ -4469,19 +4469,20 @@ body.dark-mode .music-subtext {
             const theme = prefs.theme || "light";
             const scale = Math.max(80, Math.min(180, Number(prefs.fontScale) || 100));
             const rendition = readerState.rendition;
-            rendition.themes.default({
-                "body": {
-                    "font-size": `${scale}%`,
-                    "line-height": "1.65",
-                    "background": theme === "sepia" ? "#f4ecd8" : (theme === "dark" ? "#111827" : "#ffffff"),
-                    "color": theme === "dark" ? "#e5e7eb" : "#111827",
-                    "padding": "0 1rem"
-                },
-                "p": {
-                    "margin-top": "0.6em",
-                    "margin-bottom": "0.6em"
-                }
+            rendition.themes.register("light", {
+                "body": { "background": "#ffffff", "color": "#111827", "line-height": "1.65", "padding": "0 1rem" },
+                "p": { "margin-top": "0.6em", "margin-bottom": "0.6em" }
             });
+            rendition.themes.register("sepia", {
+                "body": { "background": "#f4ecd8", "color": "#3b2f2f", "line-height": "1.65", "padding": "0 1rem" },
+                "p": { "margin-top": "0.6em", "margin-bottom": "0.6em" }
+            });
+            rendition.themes.register("dark", {
+                "body": { "background": "#111827", "color": "#e5e7eb", "line-height": "1.65", "padding": "0 1rem" },
+                "p": { "margin-top": "0.6em", "margin-bottom": "0.6em" }
+            });
+            rendition.themes.select(theme);
+            rendition.themes.fontSize(`${scale}%`);
         }
 
         function flattenToc(items, level = 0, out = []) {
@@ -4624,14 +4625,14 @@ body.dark-mode .music-subtext {
                 const rendition = book.renderTo(viewer, {
                     width: "100%",
                     height: "100%",
-                    flow: "scrolled-doc",
-                    manager: "continuous",
+                    flow: "paginated",
                     spread: "none"
                 });
                 const state = { book, rendition, docName, epubName, prefs };
-                applyEpubTheme(state);
                 hydrateEpubToolbar(card, state);
                 await rendition.display(savedPos || undefined);
+                applyEpubTheme(state);
+                if (statusEl) statusEl.textContent = "Loaded";
 
                 rendition.on("relocated", (loc) => {
                     const shown = loc?.start?.displayed;
