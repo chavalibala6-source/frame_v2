@@ -2902,6 +2902,46 @@ body.dark-mode .music-subtext {
             cursor: pointer;
         }
 
+        .epub-select-label {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 4;
+            display: none;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #111827;
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .epub-select-label input {
+            width: 14px;
+            height: 14px;
+            margin: 0;
+        }
+
+        .epub-row.select-mode .epub-select-label {
+            display: inline-flex;
+        }
+
+        .epub-embed.selected {
+            outline: 3px solid rgba(59, 130, 246, 0.8);
+            outline-offset: -2px;
+        }
+
+        .epub-controls {
+            display: flex;
+            gap: 10px;
+            padding: 8px 24px 10px 24px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
         .epub-toolbar {
             display: flex;
             justify-content: space-between;
@@ -2982,6 +3022,12 @@ body.dark-mode .music-subtext {
             border-color: rgba(255, 255, 255, 0.2);
             background: rgba(255, 255, 255, 0.06);
             color: #e5e7eb;
+        }
+
+        body.dark-mode .epub-select-label {
+            color: #e5e7eb;
+            background: rgba(15, 20, 28, 0.78);
+            border-color: rgba(255, 255, 255, 0.18);
         }
 
         @media (max-width: 768px) {
@@ -4442,6 +4488,103 @@ body.dark-mode .music-subtext {
             });
         }
 
+        const epubState = {
+            selectMode: false,
+            selectedIds: new Set()
+        };
+
+        function ensureEpubCardId(card) {
+            if (!card) return "";
+            if (!card.dataset.epubId) {
+                card.dataset.epubId = `epub:${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+            }
+            return card.dataset.epubId;
+        }
+
+        function bindEpubCardSelection(card) {
+            if (!card) return;
+            const id = ensureEpubCardId(card);
+            let label = card.querySelector('.epub-select-label');
+            if (!label) {
+                label = document.createElement('label');
+                label.className = 'epub-select-label';
+                label.innerHTML = `<input type="checkbox" class="epub-select-checkbox">Select`;
+                card.insertBefore(label, card.firstChild);
+            }
+            const checkbox = label.querySelector('.epub-select-checkbox');
+            if (!checkbox) return;
+            checkbox.checked = epubState.selectedIds.has(id);
+            card.classList.toggle('selected', checkbox.checked);
+            if (!checkbox.dataset.bound) {
+                checkbox.dataset.bound = "true";
+                checkbox.addEventListener('change', () => {
+                    if (checkbox.checked) epubState.selectedIds.add(id);
+                    else epubState.selectedIds.delete(id);
+                    card.classList.toggle('selected', checkbox.checked);
+                });
+            }
+        }
+
+        function applyEpubSelectionUI() {
+            const row = document.querySelector('.epub-row');
+            if (!row) return;
+            row.classList.toggle('select-mode', epubState.selectMode);
+            row.querySelectorAll('.epub-embed').forEach(card => bindEpubCardSelection(card));
+        }
+
+        function toggleEpubSelectMode() {
+            epubState.selectMode = !epubState.selectMode;
+            applyEpubSelectionUI();
+        }
+
+        function selectAllEpubCards() {
+            const row = document.querySelector('.epub-row');
+            if (!row) return;
+            epubState.selectMode = true;
+            row.querySelectorAll('.epub-embed').forEach(card => {
+                const id = ensureEpubCardId(card);
+                epubState.selectedIds.add(id);
+            });
+            applyEpubSelectionUI();
+        }
+
+        function deleteSelectedEpubCards() {
+            const row = document.querySelector('.epub-row');
+            if (!row) return;
+            const selected = Array.from(row.querySelectorAll('.epub-embed')).filter(card => {
+                const id = ensureEpubCardId(card);
+                return epubState.selectedIds.has(id);
+            });
+            if (selected.length === 0) return;
+            if (!confirm(`Delete ${selected.length} selected EPUB block(s)?`)) return;
+            selected.forEach(card => card.remove());
+            epubState.selectedIds.clear();
+            epubState.selectMode = false;
+            if (row.children.length === 0) row.parentElement?.remove();
+            applyEpubSelectionUI();
+            saveServer();
+        }
+
+        function deleteAllEpubCards() {
+            const row = document.querySelector('.epub-row');
+            if (!row || row.children.length === 0) return;
+            if (!confirm("Delete all EPUB blocks?")) return;
+            row.innerHTML = "";
+            epubState.selectedIds.clear();
+            epubState.selectMode = false;
+            row.parentElement?.remove();
+            saveServer();
+        }
+
+        function bindEpubShelfControls(container) {
+            if (!container || container.dataset.controlsBound === "true") return;
+            container.dataset.controlsBound = "true";
+            container.querySelector('#epubSelectModeBtn')?.addEventListener('click', toggleEpubSelectMode);
+            container.querySelector('#epubSelectAllBtn')?.addEventListener('click', selectAllEpubCards);
+            container.querySelector('#epubDeleteSelectedBtn')?.addEventListener('click', deleteSelectedEpubCards);
+            container.querySelector('#epubDeleteAllBtn')?.addEventListener('click', deleteAllEpubCards);
+        }
+
         function getOrCreateEpubShelf() {
             const existing = document.querySelector('.epub-shelf-container .epub-row')
                 || document.querySelector('.notepad > .epub-row');
@@ -4452,16 +4595,26 @@ body.dark-mode .music-subtext {
             if (!container) {
                 container = document.createElement('div');
                 container.className = 'epub-shelf-container';
+                container.innerHTML = `
+                    <div class="epub-controls">
+                        <button class="epub-nav-btn" id="epubSelectModeBtn">Select</button>
+                        <button class="epub-nav-btn" id="epubSelectAllBtn">Select All</button>
+                        <button class="epub-nav-btn" id="epubDeleteSelectedBtn">Delete Selected</button>
+                        <button class="epub-nav-btn" id="epubDeleteAllBtn">Delete All</button>
+                    </div>
+                `;
             }
             const row = document.createElement('div');
             row.className = 'epub-row';
             container.appendChild(row);
+            bindEpubShelfControls(container);
             const paperEl = document.getElementById('paper');
             if (paperEl) {
                 notepad.insertBefore(container, paperEl);
             } else {
                 notepad.insertBefore(container, notepad.firstChild);
             }
+            applyEpubSelectionUI();
             return row;
         }
 
@@ -4474,13 +4627,20 @@ body.dark-mode .music-subtext {
             const embeddedEpubRow = article.querySelector('.epub-row');
             if (!embeddedEpubRow) return;
 
-            const shelf = getOrCreateEpubShelf();
-            shelf.appendChild(embeddedEpubRow);
+            const shelfRow = getOrCreateEpubShelf();
+            const container = shelfRow.parentElement;
+            if (shelfRow !== embeddedEpubRow) {
+                shelfRow.remove();
+                container.appendChild(embeddedEpubRow);
+            }
+            bindEpubShelfControls(container);
+
             embeddedEpubRow.querySelectorAll('.epub-embed').forEach(card => {
                 // Keep consistent card size after refresh; remove any stale inline sizing.
                 card.style.width = "";
                 card.style.maxWidth = "";
                 card.style.flex = "";
+                bindEpubCardSelection(card);
                 if (!card.querySelector('.epub-delete')) {
                     const btn = document.createElement('button');
                     btn.className = 'epub-delete';
@@ -4489,6 +4649,7 @@ body.dark-mode .music-subtext {
                     card.appendChild(btn);
                 }
             });
+            applyEpubSelectionUI();
             lucide.createIcons();
         }
 
@@ -4497,8 +4658,15 @@ body.dark-mode .music-subtext {
             const card = btn?.closest('.epub-embed');
             if (!card) return;
             const row = document.querySelector('.epub-row');
+            const id = ensureEpubCardId(card);
+            epubState.selectedIds.delete(id);
             card.remove();
-            if (row && row.children.length === 0) row.parentElement?.remove();
+            if (row && row.children.length === 0) {
+                row.parentElement?.remove();
+                epubState.selectMode = false;
+            } else {
+                applyEpubSelectionUI();
+            }
             saveServer();
         }
 
@@ -4521,6 +4689,9 @@ body.dark-mode .music-subtext {
             `;
             const row = getOrCreateEpubShelf();
             row.insertAdjacentHTML("beforeend", block);
+            const card = row.lastElementChild;
+            bindEpubCardSelection(card);
+            applyEpubSelectionUI();
             lucide.createIcons();
             saveServer();
         }
