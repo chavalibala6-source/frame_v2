@@ -2081,6 +2081,8 @@ body.dark-mode .music-subtext {
             padding: 0 4px;
             position: relative;
             width: min(560px, 70vw);
+            flex: 1 1 auto;
+            min-width: 240px;
         }
 
         .dot {
@@ -2154,6 +2156,7 @@ body.dark-mode .music-subtext {
             position: relative;
             width: 100%;
             max-width: 520px;
+            min-width: 240px;
             height: 14px;
             border-radius: 999px;
             background: rgba(255, 255, 255, 0.28);
@@ -2644,6 +2647,68 @@ body.dark-mode .music-subtext {
                 border-radius: 14px;
             }
         }
+
+        .pdf-embed {
+            margin: 18px 0;
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            border-radius: 16px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.92);
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.14);
+        }
+
+        .pdf-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            background: rgba(248, 248, 250, 0.94);
+        }
+
+        .pdf-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #111827;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .pdf-download-link {
+            font-size: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            color: #0b61d8;
+        }
+
+        .pdf-frame {
+            width: 100%;
+            min-height: 500px;
+            border: 0;
+            background: #fff;
+        }
+
+        body.dark-mode .pdf-embed {
+            border-color: rgba(255, 255, 255, 0.18);
+            background: rgba(14, 18, 26, 0.9);
+        }
+
+        body.dark-mode .pdf-toolbar {
+            border-bottom-color: rgba(255, 255, 255, 0.16);
+            background: rgba(18, 22, 30, 0.9);
+        }
+
+        body.dark-mode .pdf-title {
+            color: #e5e7eb;
+        }
+
+        @media (max-width: 768px) {
+            .pdf-frame {
+                min-height: 360px;
+            }
+        }
     </style>
 </head>
 
@@ -2757,6 +2822,7 @@ body.dark-mode .music-subtext {
                     <button onclick="insertImage()" title="Insert Image"><i data-lucide="image"></i></button>
                     <button onclick="insertVideo()" title="Insert YouTube Video"><i data-lucide="video"></i></button>
                     <button onclick="insertLocalVideo()" title="Upload Video"><i data-lucide="upload"></i></button>
+                    <button onclick="insertPdf()" title="Upload PDF"><i data-lucide="file-up"></i></button>
                     <button onclick="refreshDoc()" title="Refresh Document" id="refreshBtn">
                         <i data-lucide="refresh-cw"></i>
                     </button>
@@ -2787,6 +2853,7 @@ body.dark-mode .music-subtext {
 
                 <input type="file" id="imgInput" style="display: none;" accept="image/*" multiple>
                 <input type="file" id="videoInput" style="display: none;" accept="video/*" multiple>
+                <input type="file" id="pdfInput" style="display: none;" accept="application/pdf,.pdf" multiple>
                 </div>
             </div>
         </div>
@@ -3682,6 +3749,68 @@ body.dark-mode .music-subtext {
 
         function insertLocalVideo() {
             document.getElementById("videoInput").click();
+        }
+
+        function insertPdf() {
+            document.getElementById("pdfInput").click();
+        }
+
+        function escapeHtml(text) {
+            return String(text || "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+        }
+
+        function insertPdfEmbedCard(payload) {
+            if (!payload || !payload.url) return;
+            const safeTitle = escapeHtml(payload.name || "document.pdf");
+            const safeUrl = escapeHtml(payload.url);
+            const safeDownload = escapeHtml(payload.download_url || payload.url);
+            const block = `
+                <div class="pdf-embed" contenteditable="false">
+                    <div class="pdf-toolbar">
+                        <span class="pdf-title">${safeTitle}</span>
+                        <a class="pdf-download-link" href="${safeDownload}" download="${safeTitle}" target="_blank" rel="noopener">Download PDF</a>
+                    </div>
+                    <iframe class="pdf-frame" src="${safeUrl}#view=FitH"></iframe>
+                </div>
+                <p><br></p>
+            `;
+            article.focus();
+            document.execCommand("insertHTML", false, block);
+            saveServer();
+        }
+
+        function uploadPdfFile(file) {
+            return new Promise(resolve => {
+                const isPdf = file && (file.type === "application/pdf" || /\.pdf$/i.test(file.name || ""));
+                if (!isPdf) {
+                    resolve(false);
+                    return;
+                }
+                const formData = new FormData();
+                formData.append("pdf", file);
+                const xhr = new XMLHttpRequest();
+                xhr.open("POST", "/upload_pdf", true);
+                xhr.onload = function () {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        try {
+                            const data = JSON.parse(xhr.responseText);
+                            insertPdfEmbedCard(data);
+                            resolve(true);
+                            return;
+                        } catch (e) { }
+                    }
+                    resolve(false);
+                };
+                xhr.onerror = function () {
+                    resolve(false);
+                };
+                xhr.send(formData);
+            });
         }
 
         function getOrCreateImageCarousel() {
@@ -5887,6 +6016,23 @@ rememberActiveIndex();
                 await uploadImagesInBatches(Array.from(this.files), 25);
             }
             this.value = ""; // Reset
+        });
+
+        document.getElementById("pdfInput").addEventListener("change", async function () {
+            const files = Array.from(this.files || []);
+            if (!files.length) {
+                this.value = "";
+                return;
+            }
+            status.textContent = `Uploading PDF${files.length > 1 ? "s" : ""}...`;
+            for (const file of files) {
+                const ok = await uploadPdfFile(file);
+                if (!ok) {
+                    alert(`Failed to upload PDF: ${file.name}`);
+                }
+            }
+            status.textContent = "Ready";
+            this.value = "";
         });
 
         function setColor(color) {

@@ -163,7 +163,12 @@ def uploaded_files(filename):
 
 @app.after_request
 def add_cors_headers(resp):
-    if request.path.startswith("/upload_video") or request.path.startswith("/upload_image") or request.path.startswith("/upload_file"):
+    if (
+        request.path.startswith("/upload_video")
+        or request.path.startswith("/upload_image")
+        or request.path.startswith("/upload_file")
+        or request.path.startswith("/upload_pdf")
+    ):
         resp.headers["Access-Control-Allow-Origin"] = UPLOAD_ORIGIN
         resp.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
         resp.headers["Access-Control-Allow-Headers"] = "Content-Type"
@@ -321,6 +326,35 @@ def get_public_base_url():
     if host == "noteslook.lan" and scheme == "https":
         host = "noteslook.lan:8443"
     return f"{scheme}://{host}"
+
+@app.route("/upload_pdf", methods=["POST", "OPTIONS"])
+def upload_pdf():
+    if request.method == "OPTIONS":
+        return ("", 204)
+
+    upload = request.files.get("pdf") or request.files.get("file")
+    if not upload:
+        return jsonify({"error": "No PDF file provided"}), 400
+    if not upload.filename:
+        return jsonify({"error": "Empty filename"}), 400
+
+    safe_name = secure_filename(upload.filename)
+    ext = os.path.splitext(safe_name)[1].lower()
+    mimetype = (upload.mimetype or "").lower()
+
+    if ext != ".pdf" and mimetype != "application/pdf":
+        return jsonify({"error": "Unsupported file type"}), 400
+
+    pdf_name = f"{uuid.uuid4().hex}.pdf"
+    dest_path = os.path.join(FILE_UPLOAD_DIR, pdf_name)
+    upload.save(dest_path)
+
+    base_url = get_public_base_url()
+    return jsonify({
+        "url": f"{base_url}/static/uploads/files/{pdf_name}",
+        "download_url": f"{base_url}/download_file/{pdf_name}?name={secure_filename(safe_name) or 'document.pdf'}",
+        "name": safe_name or "document.pdf"
+    })
 
 
 @app.route("/upload_file", methods=["POST", "OPTIONS"])
