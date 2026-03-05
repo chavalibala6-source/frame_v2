@@ -4604,11 +4604,23 @@ body.dark-mode .music-subtext {
 
             (async () => {
                 try {
-                // Fetch as ArrayBuffer to avoid Safari/EPUB MIME issues that cause blank pages.
-                const response = await fetch(src, { cache: "no-store" });
-                if (!response.ok) throw new Error("epub fetch failed");
-                const buffer = await response.arrayBuffer();
-                const book = window.ePub(buffer);
+                // Try multiple source strategies for better Safari/iPad compatibility.
+                let book = null;
+                try {
+                    book = window.ePub(src);
+                } catch (_) { }
+                if (!book) {
+                    const response = await fetch(src, { cache: "no-store" });
+                    if (!response.ok) throw new Error("epub fetch failed");
+                    const buffer = await response.arrayBuffer();
+                    try {
+                        book = window.ePub(buffer);
+                    } catch (_) {
+                        book = window.ePub(new Uint8Array(buffer));
+                    }
+                }
+                if (!book) throw new Error("epub init failed");
+
                 const rendition = book.renderTo(viewer, {
                     width: "100%",
                     height: "100%",
@@ -4619,7 +4631,7 @@ body.dark-mode .music-subtext {
                 const state = { book, rendition, docName, epubName, prefs };
                 applyEpubTheme(state);
                 hydrateEpubToolbar(card, state);
-                rendition.display(savedPos || undefined);
+                await rendition.display(savedPos || undefined);
 
                 rendition.on("relocated", (loc) => {
                     const shown = loc?.start?.displayed;
