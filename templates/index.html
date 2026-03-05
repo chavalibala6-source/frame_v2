@@ -4607,16 +4607,32 @@ body.dark-mode .music-subtext {
             (async () => {
                 try {
                 if (statusEl) statusEl.textContent = "Loading";
-                const response = await fetch(src, { cache: "no-store", credentials: "same-origin" });
-                if (!response.ok) throw new Error("epub fetch failed");
-                const buffer = await response.arrayBuffer();
-                const blobUrl = URL.createObjectURL(new Blob([buffer], { type: "application/epub+zip" }));
+                let buffer = null;
+                let blobUrl = null;
+                const ensureBinary = async () => {
+                    if (buffer) return;
+                    const response = await fetch(src, { cache: "no-store", credentials: "same-origin" });
+                    if (!response.ok) throw new Error(`epub fetch failed (${response.status})`);
+                    buffer = await response.arrayBuffer();
+                    blobUrl = URL.createObjectURL(new Blob([buffer], { type: "application/epub+zip" }));
+                };
 
                 const strategies = [
-                    async () => window.ePub(blobUrl),
-                    async () => window.ePub(buffer),
-                    async () => window.ePub(new Uint8Array(buffer)),
+                    async () => window.ePub(src),
                     async () => {
+                        await ensureBinary();
+                        return window.ePub(blobUrl);
+                    },
+                    async () => {
+                        await ensureBinary();
+                        return window.ePub(buffer);
+                    },
+                    async () => {
+                        await ensureBinary();
+                        return window.ePub(new Uint8Array(buffer));
+                    },
+                    async () => {
+                        await ensureBinary();
                         const b = window.ePub();
                         await b.open(buffer, "binary");
                         return b;
@@ -4655,7 +4671,7 @@ body.dark-mode .music-subtext {
                     }
                 }
                 if (!state) {
-                    URL.revokeObjectURL(blobUrl);
+                    if (blobUrl) URL.revokeObjectURL(blobUrl);
                     throw lastErr || new Error("epub init failed");
                 }
 
@@ -4678,7 +4694,7 @@ body.dark-mode .music-subtext {
                 nextBtn?.addEventListener("click", () => state.rendition.next());
                 epubReaders.set(readerId, state);
             } catch (err) {
-                if (statusEl) statusEl.textContent = "Could not open";
+                if (statusEl) statusEl.textContent = `Could not open`;
             }
             })();
         }
@@ -4725,6 +4741,10 @@ body.dark-mode .music-subtext {
             const shelf = getOrCreateEpubShelf();
             shelf.appendChild(embeddedEpubRow);
             embeddedEpubRow.querySelectorAll('.epub-embed').forEach(card => {
+                // Keep consistent card size after refresh; remove any stale inline sizing.
+                card.style.width = "";
+                card.style.maxWidth = "";
+                card.style.flex = "";
                 if (!card.dataset.epubName) {
                     const viewer = card.querySelector('.epub-viewer');
                     const src = viewer?.dataset.epubUrl || "";
