@@ -2654,14 +2654,12 @@ body.dark-mode .music-subtext {
         }
 
         .pdf-row {
-            display: flex;
-            gap: 14px;
-            overflow-x: auto;
+            position: relative;
+            display: block;
+            min-height: 320px;
+            overflow-x: hidden;
             overflow-y: visible;
             padding: 0 var(--carousel-edge);
-            scroll-snap-type: x mandatory;
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
         }
 
         .pdf-row::-webkit-scrollbar {
@@ -2669,16 +2667,15 @@ body.dark-mode .music-subtext {
         }
 
         .pdf-embed {
-            position: relative;
+            position: absolute;
             margin: 0;
-            flex: 0 0 min(680px, 90vw);
+            width: min(680px, 90vw);
             border: 1px solid rgba(0, 0, 0, 0.12);
             border-radius: 16px;
             overflow: hidden;
             background: rgba(255, 255, 255, 0.92);
             box-shadow: 0 10px 28px rgba(0, 0, 0, 0.14);
-            scroll-snap-align: center;
-            scroll-snap-stop: always;
+            user-select: none;
         }
 
         .pdf-delete {
@@ -2695,6 +2692,35 @@ body.dark-mode .music-subtext {
             font-weight: 700;
             line-height: 1;
             cursor: pointer;
+        }
+
+        .pdf-mover {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 3;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            background: rgba(0, 0, 0, 0.45);
+            color: #fff;
+            font-weight: 700;
+            line-height: 1;
+            cursor: move;
+        }
+
+        .pdf-resizer {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            right: 10px;
+            bottom: 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.55);
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 3;
+            cursor: nwse-resize;
         }
 
         .pdf-toolbar {
@@ -2732,10 +2758,17 @@ body.dark-mode .music-subtext {
 
         body.dark-mode .pdf-embed {
             border-color: rgba(255, 255, 255, 0.18);
-            background: rgba(14, 18, 26, 0.9);
+            background: #ffffffe8;
+             box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
         }
 
         body.dark-mode .pdf-delete {
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(0, 0, 0, 0.55);
+        }
+
+        body.dark-mode .pdf-mover,
+        body.dark-mode .pdf-resizer {
             border-color: rgba(255, 255, 255, 0.3);
             background: rgba(0, 0, 0, 0.55);
         }
@@ -2752,6 +2785,10 @@ body.dark-mode .music-subtext {
         @media (max-width: 768px) {
             .pdf-frame {
                 min-height: 360px;
+            }
+
+            .pdf-row {
+                min-height: 280px;
             }
         }
     </style>
@@ -3405,15 +3442,7 @@ body.dark-mode .music-subtext {
                 if (embeddedPdfRow) {
                     const shelf = getOrCreatePdfShelf();
                     shelf.appendChild(embeddedPdfRow);
-                    embeddedPdfRow.querySelectorAll('.pdf-embed').forEach(card => {
-                        if (!card.querySelector('.pdf-delete')) {
-                            const btn = document.createElement('button');
-                            btn.className = 'pdf-delete';
-                            btn.textContent = '✕';
-                            btn.onclick = () => deletePdfCard(btn);
-                            card.appendChild(btn);
-                        }
-                    });
+                    initializePdfCards(embeddedPdfRow);
                 }
 
                 // FIX: Legacy nesting (article inside article)
@@ -3832,6 +3861,10 @@ body.dark-mode .music-subtext {
                 .replace(/'/g, "&#39;");
         }
 
+        function clampValue(value, min, max) {
+            return Math.max(min, Math.min(max, value));
+        }
+
         function getOrCreatePdfShelf() {
             const existing = document.querySelector('.pdf-row');
             if (existing) return existing;
@@ -3856,6 +3889,150 @@ body.dark-mode .music-subtext {
             return row;
         }
 
+        function updatePdfShelfHeight(row) {
+            if (!row) return;
+            let maxBottom = 280;
+            row.querySelectorAll('.pdf-embed').forEach(card => {
+                const top = parseFloat(card.style.top) || 0;
+                const h = card.offsetHeight || 0;
+                maxBottom = Math.max(maxBottom, top + h + 24);
+            });
+            row.style.minHeight = `${Math.ceil(maxBottom)}px`;
+        }
+
+        function ensurePdfCardControls(card) {
+            if (!card.querySelector('.pdf-delete')) {
+                const del = document.createElement('button');
+                del.className = 'pdf-delete';
+                del.textContent = '✕';
+                del.onclick = () => deletePdfCard(del);
+                card.appendChild(del);
+            }
+            if (!card.querySelector('.pdf-mover')) {
+                const move = document.createElement('button');
+                move.className = 'pdf-mover';
+                move.textContent = '↕';
+                move.title = 'Move';
+                card.appendChild(move);
+            }
+            if (!card.querySelector('.pdf-resizer')) {
+                const resize = document.createElement('button');
+                resize.className = 'pdf-resizer';
+                resize.title = 'Resize';
+                card.appendChild(resize);
+            }
+        }
+
+        function initPdfCardInteractions(card) {
+            if (!card || card.dataset.pdfReady === "true") return;
+            const row = card.closest('.pdf-row');
+            if (!row) return;
+            const mover = card.querySelector('.pdf-mover');
+            const resizer = card.querySelector('.pdf-resizer');
+            const frame = card.querySelector('.pdf-frame');
+            if (!mover || !resizer || !frame) return;
+
+            const startMove = (evt) => {
+                evt.preventDefault();
+                const startPoint = evt.touches ? evt.touches[0] : evt;
+                const startX = startPoint.clientX;
+                const startY = startPoint.clientY;
+                const startLeft = parseFloat(card.style.left) || 0;
+                const startTop = parseFloat(card.style.top) || 0;
+
+                const onMove = (moveEvt) => {
+                    if (moveEvt.touches) moveEvt.preventDefault();
+                    const p = moveEvt.touches ? moveEvt.touches[0] : moveEvt;
+                    const dx = p.clientX - startX;
+                    const dy = p.clientY - startY;
+                    const maxLeft = Math.max(0, row.clientWidth - card.offsetWidth - 6);
+                    const nextLeft = clampValue(startLeft + dx, 0, maxLeft);
+                    const nextTop = Math.max(0, startTop + dy);
+                    card.style.left = `${nextLeft}px`;
+                    card.style.top = `${nextTop}px`;
+                    updatePdfShelfHeight(row);
+                };
+
+                const onEnd = () => {
+                    window.removeEventListener('mousemove', onMove, { capture: true });
+                    window.removeEventListener('mouseup', onEnd, { capture: true });
+                    window.removeEventListener('touchmove', onMove, { capture: true });
+                    window.removeEventListener('touchend', onEnd, { capture: true });
+                    saveServer();
+                };
+
+                window.addEventListener('mousemove', onMove, { capture: true });
+                window.addEventListener('mouseup', onEnd, { capture: true });
+                window.addEventListener('touchmove', onMove, { capture: true, passive: false });
+                window.addEventListener('touchend', onEnd, { capture: true });
+            };
+
+            const startResize = (evt) => {
+                evt.preventDefault();
+                const startPoint = evt.touches ? evt.touches[0] : evt;
+                const startX = startPoint.clientX;
+                const startY = startPoint.clientY;
+                const startWidth = card.offsetWidth;
+                const startFrameHeight = frame.offsetHeight || 420;
+
+                const onResize = (moveEvt) => {
+                    if (moveEvt.touches) moveEvt.preventDefault();
+                    const p = moveEvt.touches ? moveEvt.touches[0] : moveEvt;
+                    const dx = p.clientX - startX;
+                    const dy = p.clientY - startY;
+                    const maxWidth = Math.max(300, row.clientWidth - (parseFloat(card.style.left) || 0) - 8);
+                    const nextWidth = clampValue(startWidth + dx, 280, maxWidth);
+                    const nextFrameHeight = clampValue(startFrameHeight + dy, 220, Math.max(320, window.innerHeight - 160));
+                    card.style.width = `${nextWidth}px`;
+                    frame.style.height = `${nextFrameHeight}px`;
+                    updatePdfShelfHeight(row);
+                };
+
+                const onEnd = () => {
+                    window.removeEventListener('mousemove', onResize, { capture: true });
+                    window.removeEventListener('mouseup', onEnd, { capture: true });
+                    window.removeEventListener('touchmove', onResize, { capture: true });
+                    window.removeEventListener('touchend', onEnd, { capture: true });
+                    saveServer();
+                };
+
+                window.addEventListener('mousemove', onResize, { capture: true });
+                window.addEventListener('mouseup', onEnd, { capture: true });
+                window.addEventListener('touchmove', onResize, { capture: true, passive: false });
+                window.addEventListener('touchend', onEnd, { capture: true });
+            };
+
+            mover.addEventListener('mousedown', startMove);
+            mover.addEventListener('touchstart', startMove, { passive: false });
+            resizer.addEventListener('mousedown', startResize);
+            resizer.addEventListener('touchstart', startResize, { passive: false });
+            card.dataset.pdfReady = "true";
+        }
+
+        function initializePdfCards(row) {
+            if (!row) return;
+            const cards = Array.from(row.querySelectorAll('.pdf-embed'));
+            cards.forEach((card, idx) => {
+                ensurePdfCardControls(card);
+                card.style.position = 'absolute';
+                if (!card.style.left) card.style.left = `${24 + (idx % 3) * 34}px`;
+                if (!card.style.top) card.style.top = `${12 + Math.floor(idx / 3) * 46}px`;
+                if (!card.style.width) {
+                    const w = Math.min(680, Math.max(300, (row.clientWidth || window.innerWidth || 900) - 40));
+                    card.style.width = `${w}px`;
+                }
+                const frame = card.querySelector('.pdf-frame');
+                if (frame && !frame.style.height) frame.style.height = '420px';
+                initPdfCardInteractions(card);
+            });
+            updatePdfShelfHeight(row);
+        }
+
+        window.addEventListener('resize', () => {
+            const row = document.querySelector('.pdf-row');
+            if (row) updatePdfShelfHeight(row);
+        });
+
         function deletePdfCard(btn) {
             if (!confirm("Delete this PDF block?")) return;
             const card = btn?.closest('.pdf-embed');
@@ -3863,6 +4040,8 @@ body.dark-mode .music-subtext {
             if (card) card.remove();
             if (row && row.children.length === 0) {
                 row.parentElement?.remove();
+            } else {
+                updatePdfShelfHeight(row);
             }
             saveServer();
         }
@@ -3875,6 +4054,8 @@ body.dark-mode .music-subtext {
             const block = `
                 <div class="pdf-embed">
                     <button class="pdf-delete" onclick="deletePdfCard(this)">✕</button>
+                    <button class="pdf-mover" title="Move">↕</button>
+                    <button class="pdf-resizer" title="Resize"></button>
                     <div class="pdf-toolbar">
                         <span class="pdf-title">${safeTitle}</span>
                         <a class="pdf-download-link" href="${safeDownload}" download="${safeTitle}" target="_blank" rel="noopener">Download PDF</a>
@@ -3884,6 +4065,7 @@ body.dark-mode .music-subtext {
             `;
             const row = getOrCreatePdfShelf();
             row.insertAdjacentHTML("beforeend", block);
+            initializePdfCards(row);
             saveServer();
         }
 
