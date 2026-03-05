@@ -2861,8 +2861,9 @@ body.dark-mode .music-subtext {
             scroll-snap-type: x mandatory;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
-            touch-action: auto;
+            touch-action: pan-x;
             overscroll-behavior-x: contain;
+            overscroll-behavior-y: auto;
         }
 
         .epub-row::-webkit-scrollbar {
@@ -2882,6 +2883,7 @@ body.dark-mode .music-subtext {
             box-shadow: 0 10px 28px rgba(0, 0, 0, 0.14);
             scroll-snap-align: center;
             scroll-snap-stop: always;
+            touch-action: pan-x;
         }
 
         .epub-delete {
@@ -3005,6 +3007,7 @@ body.dark-mode .music-subtext {
             .epub-row {
                 gap: 14px;
                 padding: 0 16px;
+                touch-action: pan-x;
             }
 
             .epub-embed {
@@ -3038,6 +3041,7 @@ body.dark-mode .music-subtext {
             .epub-row {
                 gap: 14px;
                 padding: 0 16px;
+                touch-action: pan-x;
             }
 
             .epub-embed {
