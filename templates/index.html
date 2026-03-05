@@ -3831,7 +3831,8 @@ body.dark-mode .music-subtext {
         }
 
         function getOrCreatePdfShelf() {
-            const existing = document.querySelector('.pdf-row');
+            const existing = document.querySelector('.pdf-shelf-container .pdf-row')
+                || document.querySelector('.notepad > .pdf-row');
             if (existing) return existing;
 
             const notepad = document.querySelector('.notepad');
