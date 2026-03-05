@@ -4591,7 +4591,8 @@ body.dark-mode .music-subtext {
             const prevBtn = card.querySelector('.epub-prev');
             const nextBtn = card.querySelector('.epub-next');
             const statusEl = card.querySelector('.epub-status');
-            const src = viewer?.dataset.epubUrl || "";
+            const rawSrc = viewer?.dataset.epubUrl || "";
+            const src = normalizeAssetUrl(rawSrc);
             if (!viewer || !src) return;
             if (typeof window.ePub !== "function") {
                 if (statusEl) statusEl.textContent = "Reader unavailable";
@@ -4605,20 +4606,21 @@ body.dark-mode .music-subtext {
 
             (async () => {
                 try {
-                // Try multiple source strategies for better Safari/iPad compatibility.
+                if (statusEl) statusEl.textContent = "Loading";
+
+                // Try URL first.
                 let book = null;
                 try {
                     book = window.ePub(src);
                 } catch (_) { }
+
+                // Fallback to binary open (more reliable for Safari/iPad).
                 if (!book) {
-                    const response = await fetch(src, { cache: "no-store" });
+                    const response = await fetch(src, { cache: "no-store", credentials: "same-origin" });
                     if (!response.ok) throw new Error("epub fetch failed");
                     const buffer = await response.arrayBuffer();
-                    try {
-                        book = window.ePub(buffer);
-                    } catch (_) {
-                        book = window.ePub(new Uint8Array(buffer));
-                    }
+                    book = window.ePub();
+                    await book.open(buffer, "binary");
                 }
                 if (!book) throw new Error("epub init failed");
 
@@ -4630,7 +4632,11 @@ body.dark-mode .music-subtext {
                 });
                 const state = { book, rendition, docName, epubName, prefs };
                 hydrateEpubToolbar(card, state);
-                await rendition.display(savedPos || undefined);
+                try {
+                    await rendition.display(savedPos || undefined);
+                } catch (_) {
+                    await rendition.display();
+                }
                 applyEpubTheme(state);
                 if (statusEl) statusEl.textContent = "Loaded";
 
@@ -4652,6 +4658,20 @@ body.dark-mode .music-subtext {
                 if (statusEl) statusEl.textContent = "Could not open";
             }
             })();
+        }
+
+        function normalizeAssetUrl(url) {
+            if (!url) return "";
+            try {
+                const u = new URL(url, window.location.href);
+                // If same host, keep full URL; otherwise prefer same-origin path for uploaded assets.
+                if (u.origin !== window.location.origin && u.pathname.startsWith("/static/uploads/")) {
+                    return `${u.pathname}${u.search || ""}`;
+                }
+                return u.href;
+            } catch {
+                return url;
+            }
         }
 
         function hydrateEpubReaders(root = document) {
