@@ -6857,7 +6857,7 @@ rememberActiveIndex();
                     </button>
                 </div>
                 <div class="music-download-status">${track.status}</div>
-                <audio src="${track.url}" preload="metadata"></audio>
+                <audio src="${track.url}" preload="none"></audio>
             `;
             const checkbox = card.querySelector("input[type=checkbox]");
             const playBtn = card.querySelector(".music-play-btn");
@@ -6919,7 +6919,15 @@ rememberActiveIndex();
         function playMusicTrack(track) {
             if (!track.audio) return;
             pauseOtherMusic(track.id);
-            track.audio.play().catch(() => { });
+            try {
+                if (track.audio.preload !== "auto") {
+                    track.audio.preload = "auto";
+                    track.audio.load();
+                }
+            } catch (_) { }
+            track.audio.play().catch(() => {
+                updateMusicStatusLabel("Could not play track. Try again.");
+            });
             musicState.currentId = track.id;
             track.card?.classList.add("is-playing");
             updateMusicButtons();
