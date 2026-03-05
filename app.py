@@ -88,6 +88,20 @@ def init_db():
                 )
             """)
             cur.execute("""
+                CREATE TABLE IF NOT EXISTS pdf_highlights (
+                    id SERIAL PRIMARY KEY,
+                    doc_name TEXT NOT NULL,
+                    pdf_name TEXT NOT NULL,
+                    highlighted_text TEXT NOT NULL,
+                    color TEXT NOT NULL DEFAULT '#fff59d',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+            cur.execute("""
+                CREATE INDEX IF NOT EXISTS idx_pdf_highlights_doc_pdf
+                ON pdf_highlights (doc_name, pdf_name, created_at)
+            """)
+            cur.execute("""
                 ALTER TABLE music_tracks
                 ADD COLUMN IF NOT EXISTS doc_name TEXT NOT NULL DEFAULT 'global'
             """)
@@ -351,6 +365,7 @@ def upload_pdf():
 
     base_url = get_public_base_url()
     return jsonify({
+        "pdf_name": pdf_name,
         "url": f"{base_url}/static/uploads/files/{pdf_name}",
         "download_url": f"{base_url}/download_file/{pdf_name}?name={secure_filename(safe_name) or 'document.pdf'}",
         "name": safe_name or "document.pdf"
@@ -413,6 +428,77 @@ def download_file(filename):
     safe_name = request.args.get("name") or filename
     safe_name = secure_filename(safe_name) or filename
     return send_from_directory(FILE_UPLOAD_DIR, filename, as_attachment=True, download_name=safe_name)
+
+
+@app.route("/pdf_highlights", methods=["GET", "POST"])
+def pdf_highlights():
+    if request.method == "GET":
+        doc_name = (request.args.get("doc") or "global").strip() or "global"
+        pdf_name = (request.args.get("pdf") or "").strip()
+        if not pdf_name:
+            return jsonify({"error": "Missing pdf parameter"}), 400
+
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT id, highlighted_text, color, created_at
+                    FROM pdf_highlights
+                    WHERE doc_name = %s AND pdf_name = %s
+                    ORDER BY created_at ASC, id ASC
+                """, (doc_name, pdf_name))
+                rows = cur.fetchall()
+
+        return jsonify([
+            {
+                "id": row[0],
+                "text": row[1],
+                "color": row[2],
+                "created_at": row[3].isoformat() if row[3] else None
+            }
+            for row in rows
+        ])
+
+    data = request.get_json(silent=True) or {}
+    doc_name = (data.get("doc") or "global").strip() or "global"
+    pdf_name = (data.get("pdf") or "").strip()
+    text = (data.get("text") or "").strip()
+    color = (data.get("color") or "#fff59d").strip() or "#fff59d"
+
+    if not pdf_name:
+        return jsonify({"error": "Missing pdf"}), 400
+    if not text:
+        return jsonify({"error": "Missing text"}), 400
+
+    # Keep highlight notes bounded and predictable.
+    text = text[:1000]
+    color = color[:32]
+
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                INSERT INTO pdf_highlights (doc_name, pdf_name, highlighted_text, color)
+                VALUES (%s, %s, %s, %s)
+                RETURNING id, highlighted_text, color, created_at
+            """, (doc_name, pdf_name, text, color))
+            row = cur.fetchone()
+            conn.commit()
+
+    return jsonify({
+        "id": row[0],
+        "text": row[1],
+        "color": row[2],
+        "created_at": row[3].isoformat() if row[3] else None
+    }), 201
+
+
+@app.route("/pdf_highlights/<int:highlight_id>", methods=["DELETE"])
+def delete_pdf_highlight(highlight_id):
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM pdf_highlights WHERE id=%s", (highlight_id,))
+            deleted = cur.rowcount
+            conn.commit()
+    return jsonify({"status": "deleted" if deleted else "not found"})
 
 
 @app.route("/music_tracks")

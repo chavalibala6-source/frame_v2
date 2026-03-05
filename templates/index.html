@@ -2724,6 +2724,13 @@ body.dark-mode .music-subtext {
             background: rgba(248, 248, 250, 0.94);
         }
 
+        .pdf-tools {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
         .pdf-title {
             font-size: 13px;
             font-weight: 600;
@@ -2738,6 +2745,58 @@ body.dark-mode .music-subtext {
             font-weight: 600;
             text-decoration: none;
             color: #0b61d8;
+        }
+
+        .pdf-highlight-btn {
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid rgba(0, 0, 0, 0.16);
+            border-radius: 999px;
+            padding: 5px 10px;
+            background: rgba(255, 245, 157, 0.6);
+            color: #111827;
+            cursor: pointer;
+        }
+
+        .pdf-highlight-list {
+            display: flex;
+            gap: 8px;
+            padding: 10px 12px;
+            overflow-x: auto;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            background: rgba(255, 255, 255, 0.72);
+        }
+
+        .pdf-highlight-list:empty {
+            display: none;
+        }
+
+        .pdf-highlight-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            max-width: 320px;
+            border-radius: 999px;
+            border: 1px solid rgba(0, 0, 0, 0.16);
+            padding: 4px 10px;
+            font-size: 12px;
+            color: #111827;
+            white-space: nowrap;
+        }
+
+        .pdf-highlight-text {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .pdf-highlight-remove {
+            border: 0;
+            background: transparent;
+            color: #4b5563;
+            cursor: pointer;
+            font-size: 13px;
+            line-height: 1;
+            padding: 0;
         }
 
         .pdf-frame {
@@ -2766,6 +2825,26 @@ body.dark-mode .music-subtext {
 
         body.dark-mode .pdf-title {
             color: #e5e7eb;
+        }
+
+        body.dark-mode .pdf-highlight-btn {
+            border-color: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 245, 157, 0.35);
+            color: #f3f4f6;
+        }
+
+        body.dark-mode .pdf-highlight-list {
+            border-bottom-color: rgba(255, 255, 255, 0.14);
+            background: rgba(15, 20, 28, 0.66);
+        }
+
+        body.dark-mode .pdf-highlight-chip {
+            border-color: rgba(255, 255, 255, 0.2);
+            color: #f3f4f6;
+        }
+
+        body.dark-mode .pdf-highlight-remove {
+            color: #cbd5e1;
         }
 
         @media (max-width: 768px) {
@@ -3843,6 +3922,145 @@ body.dark-mode .music-subtext {
                 .replace(/'/g, "&#39;");
         }
 
+        function extractPdfNameFromUrl(url) {
+            if (!url) return "";
+            try {
+                const u = new URL(url, window.location.origin);
+                const base = (u.pathname || "").split("/").pop() || "";
+                return decodeURIComponent(base);
+            } catch {
+                return "";
+            }
+        }
+
+        function ensurePdfCardMeta(card) {
+            if (!card) return "";
+            if (!card.dataset.pdfName) {
+                const frame = card.querySelector(".pdf-frame");
+                const src = frame?.getAttribute("src") || "";
+                card.dataset.pdfName = extractPdfNameFromUrl(src);
+            }
+            return card.dataset.pdfName || "";
+        }
+
+        function ensurePdfHighlightUI(card) {
+            if (!card) return;
+
+            const toolbar = card.querySelector(".pdf-toolbar");
+            if (!toolbar) return;
+
+            let tools = toolbar.querySelector(".pdf-tools");
+            if (!tools) {
+                tools = document.createElement("div");
+                tools.className = "pdf-tools";
+                const download = toolbar.querySelector(".pdf-download-link");
+                if (download) {
+                    tools.appendChild(download);
+                }
+                toolbar.appendChild(tools);
+            }
+
+            let addBtn = tools.querySelector(".pdf-highlight-btn");
+            if (!addBtn) {
+                addBtn = document.createElement("button");
+                addBtn.className = "pdf-highlight-btn";
+                addBtn.type = "button";
+                addBtn.textContent = "Highlight";
+                tools.appendChild(addBtn);
+            }
+
+            let list = card.querySelector(".pdf-highlight-list");
+            if (!list) {
+                list = document.createElement("div");
+                list.className = "pdf-highlight-list";
+                const frame = card.querySelector(".pdf-frame");
+                if (frame) {
+                    card.insertBefore(list, frame);
+                } else {
+                    card.appendChild(list);
+                }
+            }
+
+            if (!addBtn.dataset.bound) {
+                addBtn.dataset.bound = "true";
+                addBtn.addEventListener("click", () => addPdfHighlight(card));
+            }
+        }
+
+        function renderPdfHighlights(card, highlights) {
+            if (!card) return;
+            ensurePdfHighlightUI(card);
+            const list = card.querySelector(".pdf-highlight-list");
+            if (!list) return;
+
+            list.innerHTML = "";
+            (highlights || []).forEach(item => {
+                const chip = document.createElement("div");
+                chip.className = "pdf-highlight-chip";
+                chip.style.background = item.color || "#fff59d";
+                chip.innerHTML = `
+                    <span class="pdf-highlight-text">${escapeHtml(item.text || "")}</span>
+                    <button type="button" class="pdf-highlight-remove" aria-label="Remove highlight">&times;</button>
+                `;
+                const removeBtn = chip.querySelector(".pdf-highlight-remove");
+                removeBtn?.addEventListener("click", () => removePdfHighlight(card, item.id));
+                list.appendChild(chip);
+            });
+        }
+
+        async function loadPdfHighlights(card) {
+            if (!card) return;
+            const pdfName = ensurePdfCardMeta(card);
+            if (!pdfName) return;
+            const docName = (current || "global").trim() || "global";
+            const params = new URLSearchParams({ doc: docName, pdf: pdfName });
+            try {
+                const res = await fetch(`/pdf_highlights?${params.toString()}`);
+                if (!res.ok) return;
+                const data = await res.json();
+                renderPdfHighlights(card, Array.isArray(data) ? data : []);
+            } catch (_) { }
+        }
+
+        async function addPdfHighlight(card) {
+            const pdfName = ensurePdfCardMeta(card);
+            if (!pdfName) {
+                alert("Unable to identify PDF file");
+                return;
+            }
+
+            const seed = (window.getSelection && window.getSelection().toString().trim()) || "";
+            const text = (prompt("Enter highlighted text to save", seed) || "").trim();
+            if (!text) return;
+            const colorInput = (prompt("Highlight color (hex)", "#fff59d") || "#fff59d").trim();
+            const color = colorInput || "#fff59d";
+            const docName = (current || "global").trim() || "global";
+
+            try {
+                const res = await fetch("/pdf_highlights", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ doc: docName, pdf: pdfName, text, color })
+                });
+                if (!res.ok) {
+                    alert("Failed to save highlight");
+                    return;
+                }
+                await loadPdfHighlights(card);
+                saveServer();
+            } catch (_) {
+                alert("Failed to save highlight");
+            }
+        }
+
+        async function removePdfHighlight(card, id) {
+            if (!id) return;
+            try {
+                await fetch(`/pdf_highlights/${id}`, { method: "DELETE" });
+                await loadPdfHighlights(card);
+            } catch (_) { }
+        }
+
         function getOrCreatePdfShelf() {
             const existing = document.querySelector('.pdf-shelf-container .pdf-row')
                 || document.querySelector('.notepad > .pdf-row');
@@ -3915,6 +4133,9 @@ body.dark-mode .music-subtext {
             const shelf = getOrCreatePdfShelf();
             shelf.appendChild(embeddedPdfRow);
             embeddedPdfRow.querySelectorAll('.pdf-embed').forEach(card => {
+                ensurePdfCardMeta(card);
+                ensurePdfHighlightUI(card);
+                loadPdfHighlights(card);
                 if (!card.querySelector('.pdf-delete')) {
                     const btn = document.createElement('button');
                     btn.className = 'pdf-delete';
@@ -3948,18 +4169,27 @@ body.dark-mode .music-subtext {
             const safeTitle = escapeHtml(payload.name || "document.pdf");
             const safeUrl = escapeHtml(payload.url);
             const safeDownload = escapeHtml(payload.download_url || payload.url);
+            const pdfName = escapeHtml(payload.pdf_name || extractPdfNameFromUrl(payload.url));
             const block = `
-                <div class="pdf-embed">
+                <div class="pdf-embed" data-pdf-name="${pdfName}">
                     <button class="pdf-delete" onclick="deletePdfCard(this)">✕</button>
                     <div class="pdf-toolbar">
                         <span class="pdf-title">${safeTitle}</span>
-                        <a class="pdf-download-link" href="${safeDownload}" download="${safeTitle}" target="_blank" rel="noopener">Download PDF</a>
+                        <div class="pdf-tools">
+                            <a class="pdf-download-link" href="${safeDownload}" download="${safeTitle}" target="_blank" rel="noopener">Download PDF</a>
+                            <button type="button" class="pdf-highlight-btn">Highlight</button>
+                        </div>
                     </div>
+                    <div class="pdf-highlight-list"></div>
                     <iframe class="pdf-frame" src="${safeUrl}#view=FitH"></iframe>
                 </div>
             `;
             const row = getOrCreatePdfShelf();
             row.insertAdjacentHTML("beforeend", block);
+            const card = row.lastElementChild;
+            ensurePdfCardMeta(card);
+            ensurePdfHighlightUI(card);
+            loadPdfHighlights(card);
             updatePdfFocusStates();
             saveServer();
         }
