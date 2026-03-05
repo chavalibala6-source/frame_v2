@@ -182,6 +182,7 @@ def add_cors_headers(resp):
         or request.path.startswith("/upload_image")
         or request.path.startswith("/upload_file")
         or request.path.startswith("/upload_pdf")
+        or request.path.startswith("/upload_epub")
     ):
         resp.headers["Access-Control-Allow-Origin"] = UPLOAD_ORIGIN
         resp.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
@@ -369,6 +370,35 @@ def upload_pdf():
         "url": f"{base_url}/static/uploads/files/{pdf_name}",
         "download_url": f"{base_url}/download_file/{pdf_name}?name={secure_filename(safe_name) or 'document.pdf'}",
         "name": safe_name or "document.pdf"
+    })
+
+@app.route("/upload_epub", methods=["POST", "OPTIONS"])
+def upload_epub():
+    if request.method == "OPTIONS":
+        return ("", 204)
+
+    upload = request.files.get("epub") or request.files.get("file")
+    if not upload:
+        return jsonify({"error": "No EPUB file provided"}), 400
+    if not upload.filename:
+        return jsonify({"error": "Empty filename"}), 400
+
+    safe_name = secure_filename(upload.filename)
+    ext = os.path.splitext(safe_name)[1].lower()
+    mimetype = (upload.mimetype or "").lower()
+    if ext != ".epub" and "epub" not in mimetype:
+        return jsonify({"error": "Unsupported file type"}), 400
+
+    epub_name = f"{uuid.uuid4().hex}.epub"
+    dest_path = os.path.join(FILE_UPLOAD_DIR, epub_name)
+    upload.save(dest_path)
+
+    base_url = get_public_base_url()
+    return jsonify({
+        "epub_name": epub_name,
+        "url": f"{base_url}/static/uploads/files/{epub_name}",
+        "download_url": f"{base_url}/download_file/{epub_name}?name={secure_filename(safe_name) or 'book.epub'}",
+        "name": safe_name or "book.epub"
     })
 
 

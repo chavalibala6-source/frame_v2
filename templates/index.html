@@ -2847,6 +2847,120 @@ body.dark-mode .music-subtext {
             color: #cbd5e1;
         }
 
+        .epub-shelf-container {
+            width: 100%;
+            padding: 8px 0 16px 0;
+        }
+
+        .epub-row {
+            display: flex;
+            gap: 18px;
+            overflow-x: auto;
+            overflow-y: visible;
+            padding: 0 24px;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            touch-action: auto;
+            overscroll-behavior-x: contain;
+        }
+
+        .epub-row::-webkit-scrollbar {
+            display: none;
+        }
+
+        .epub-embed {
+            position: relative;
+            margin: 0;
+            flex: 0 0 86%;
+            width: 86%;
+            max-width: 86%;
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            border-radius: 16px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.96);
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.14);
+            scroll-snap-align: center;
+            scroll-snap-stop: always;
+        }
+
+        .epub-delete {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 3;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            background: rgba(0, 0, 0, 0.45);
+            color: #fff;
+            font-weight: 700;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .epub-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 44px 10px 14px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            background: rgba(248, 248, 250, 0.94);
+        }
+
+        .epub-tools {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .epub-nav-btn {
+            border: 1px solid rgba(0, 0, 0, 0.14);
+            background: rgba(255, 255, 255, 0.86);
+            color: #111827;
+            border-radius: 999px;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .epub-status {
+            font-size: 12px;
+            color: #475569;
+            min-width: 70px;
+            text-align: center;
+        }
+
+        .epub-viewer {
+            height: clamp(420px, 68vh, 820px);
+            min-height: 420px;
+            background: #fff;
+        }
+
+        body.dark-mode .epub-embed {
+            border-color: rgba(255, 255, 255, 0.18);
+            background: rgba(18, 22, 30, 0.94);
+            box-shadow: 0 12px 34px rgba(0, 0, 0, 0.28);
+        }
+
+        body.dark-mode .epub-toolbar {
+            border-bottom-color: rgba(255, 255, 255, 0.16);
+            background: rgba(18, 22, 30, 0.9);
+        }
+
+        body.dark-mode .epub-nav-btn {
+            border-color: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.06);
+            color: #e5e7eb;
+        }
+
+        body.dark-mode .epub-status {
+            color: #cbd5e1;
+        }
+
         @media (max-width: 768px) {
             .pdf-row {
                 gap: 14px;
@@ -2867,6 +2981,22 @@ body.dark-mode .music-subtext {
                 min-height: 320px;
             }
 
+            .epub-row {
+                gap: 14px;
+                padding: 0 16px;
+            }
+
+            .epub-embed {
+                flex: 0 0 90%;
+                width: 90%;
+                max-width: 90%;
+            }
+
+            .epub-viewer {
+                height: clamp(360px, 70vw, 560px);
+                min-height: 360px;
+            }
+
         }
 
         @media (max-width: 1024px) and (pointer: coarse) {
@@ -2879,6 +3009,17 @@ body.dark-mode .music-subtext {
             }
 
             .pdf-embed {
+                flex: 0 0 90%;
+                width: 90%;
+                max-width: 90%;
+            }
+
+            .epub-row {
+                gap: 14px;
+                padding: 0 16px;
+            }
+
+            .epub-embed {
                 flex: 0 0 90%;
                 width: 90%;
                 max-width: 90%;
@@ -2998,6 +3139,7 @@ body.dark-mode .music-subtext {
                     <button onclick="insertVideo()" title="Insert YouTube Video"><i data-lucide="video"></i></button>
                     <button onclick="insertLocalVideo()" title="Upload Video"><i data-lucide="upload"></i></button>
                     <button onclick="insertPdf()" title="Upload PDF"><i data-lucide="file-up"></i></button>
+                    <button onclick="insertEpub()" title="Upload EPUB"><i data-lucide="book-open"></i></button>
                     <button onclick="refreshDoc()" title="Refresh Document" id="refreshBtn">
                         <i data-lucide="refresh-cw"></i>
                     </button>
@@ -3029,6 +3171,7 @@ body.dark-mode .music-subtext {
                 <input type="file" id="imgInput" style="display: none;" accept="image/*" multiple>
                 <input type="file" id="videoInput" style="display: none;" accept="video/*" multiple>
                 <input type="file" id="pdfInput" style="display: none;" accept="application/pdf,.pdf" multiple>
+                <input type="file" id="epubInput" style="display: none;" accept="application/epub+zip,.epub" multiple>
                 </div>
             </div>
         </div>
@@ -3278,6 +3421,7 @@ body.dark-mode .music-subtext {
                 const embeddedRow = article.querySelector('.video-row');
                 const embeddedLocalRow = article.querySelector('.local-video-row');
                 const embeddedPdfRow = article.querySelector('.pdf-row');
+                const embeddedEpubRow = article.querySelector('.epub-row');
 
                 // Cleanup: Remove ANY existing image/video rows/containers from notepad before placing new one
                 const existingCarousels = document.querySelectorAll('.notepad > .video-carousel-container');
@@ -3296,6 +3440,10 @@ body.dark-mode .music-subtext {
                 existingPdfShelves.forEach(c => c.remove());
                 const existingPdfRows = document.querySelectorAll('.notepad > .pdf-row');
                 existingPdfRows.forEach(r => r.remove());
+                const existingEpubShelves = document.querySelectorAll('.notepad > .epub-shelf-container');
+                existingEpubShelves.forEach(c => c.remove());
+                const existingEpubRows = document.querySelectorAll('.notepad > .epub-row');
+                existingEpubRows.forEach(r => r.remove());
 
                 if (embeddedImageRow) {
                     const notepad = document.querySelector('.notepad');
@@ -3535,6 +3683,9 @@ body.dark-mode .music-subtext {
                 if (embeddedPdfRow) {
                     syncPdfShelfFromArticle();
                 }
+                if (embeddedEpubRow) {
+                    syncEpubShelfFromArticle();
+                }
 
                 // FIX: Legacy nesting (article inside article)
                 const nestedArticle = article.querySelector('.article');
@@ -3715,6 +3866,7 @@ body.dark-mode .music-subtext {
             // 3. Get Local Video Row HTML if it exists
             const localVideoRow = document.querySelector('.local-video-row');
             const pdfRow = document.querySelector('.pdf-row');
+            const epubRow = document.querySelector('.epub-row');
             let content = "";
             if (imageRow) {
                 content += imageRow.outerHTML;
@@ -3727,6 +3879,9 @@ body.dark-mode .music-subtext {
             }
             if (pdfRow) {
                 content += pdfRow.outerHTML;
+            }
+            if (epubRow) {
+                content += epubRow.outerHTML;
             }
             // 3. Get Article Content
             content += article.innerHTML;
@@ -3941,6 +4096,10 @@ body.dark-mode .music-subtext {
 
         function insertPdf() {
             document.getElementById("pdfInput").click();
+        }
+
+        function insertEpub() {
+            document.getElementById("epubInput").click();
         }
 
         function escapeHtml(text) {
@@ -4245,6 +4404,179 @@ body.dark-mode .music-subtext {
                         try {
                             const data = JSON.parse(xhr.responseText);
                             insertPdfEmbedCard(data);
+                            resolve(true);
+                            return;
+                        } catch (e) { }
+                    }
+                    resolve(false);
+                };
+                xhr.onerror = function () {
+                    resolve(false);
+                };
+                xhr.send(formData);
+            });
+        }
+
+        const epubReaders = new Map();
+
+        function getOrCreateEpubShelf() {
+            const existing = document.querySelector('.epub-shelf-container .epub-row')
+                || document.querySelector('.notepad > .epub-row');
+            if (existing) return existing;
+
+            const notepad = document.querySelector('.notepad');
+            let container = document.querySelector('.epub-shelf-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.className = 'epub-shelf-container';
+            }
+            const row = document.createElement('div');
+            row.className = 'epub-row';
+            container.appendChild(row);
+            const paperEl = document.getElementById('paper');
+            if (paperEl) {
+                notepad.insertBefore(container, paperEl);
+            } else {
+                notepad.insertBefore(container, notepad.firstChild);
+            }
+            return row;
+        }
+
+        function ensureEpubCardId(card) {
+            if (!card) return "";
+            if (!card.dataset.epubId) {
+                card.dataset.epubId = `epub:${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+            }
+            return card.dataset.epubId;
+        }
+
+        function initEpubReaderCard(card) {
+            if (!card) return;
+            const readerId = ensureEpubCardId(card);
+            if (epubReaders.has(readerId)) return;
+            const viewer = card.querySelector('.epub-viewer');
+            const prevBtn = card.querySelector('.epub-prev');
+            const nextBtn = card.querySelector('.epub-next');
+            const statusEl = card.querySelector('.epub-status');
+            const src = viewer?.dataset.epubUrl || "";
+            if (!viewer || !src) return;
+            if (typeof window.ePub !== "function") {
+                if (statusEl) statusEl.textContent = "Reader unavailable";
+                return;
+            }
+
+            try {
+                const book = window.ePub(src);
+                const rendition = book.renderTo(viewer, {
+                    width: "100%",
+                    height: "100%",
+                    flow: "paginated",
+                    spread: "none"
+                });
+                rendition.display();
+
+                rendition.on("relocated", (loc) => {
+                    const shown = loc?.start?.displayed;
+                    if (statusEl && shown && shown.total) {
+                        statusEl.textContent = `${shown.page}/${shown.total}`;
+                    }
+                });
+
+                prevBtn?.addEventListener("click", () => rendition.prev());
+                nextBtn?.addEventListener("click", () => rendition.next());
+                epubReaders.set(readerId, { book, rendition });
+            } catch (err) {
+                if (statusEl) statusEl.textContent = "Could not open";
+            }
+        }
+
+        function hydrateEpubReaders(root = document) {
+            root.querySelectorAll('.epub-embed').forEach(card => initEpubReaderCard(card));
+        }
+
+        function syncEpubShelfFromArticle() {
+            const existingEpubShelves = document.querySelectorAll('.notepad > .epub-shelf-container');
+            existingEpubShelves.forEach(c => c.remove());
+            const existingEpubRows = document.querySelectorAll('.notepad > .epub-row');
+            existingEpubRows.forEach(r => r.remove());
+
+            const embeddedEpubRow = article.querySelector('.epub-row');
+            if (!embeddedEpubRow) return;
+
+            const shelf = getOrCreateEpubShelf();
+            shelf.appendChild(embeddedEpubRow);
+            embeddedEpubRow.querySelectorAll('.epub-embed').forEach(card => {
+                if (!card.querySelector('.epub-delete')) {
+                    const btn = document.createElement('button');
+                    btn.className = 'epub-delete';
+                    btn.textContent = '✕';
+                    btn.onclick = () => deleteEpubCard(btn);
+                    card.appendChild(btn);
+                }
+            });
+            hydrateEpubReaders(embeddedEpubRow);
+        }
+
+        function deleteEpubCard(btn) {
+            if (!confirm("Delete this EPUB block?")) return;
+            const card = btn?.closest('.epub-embed');
+            if (!card) return;
+            const row = document.querySelector('.epub-row');
+            const id = card.dataset.epubId;
+            const reader = id ? epubReaders.get(id) : null;
+            if (reader?.rendition?.destroy) {
+                try { reader.rendition.destroy(); } catch (_) { }
+            }
+            if (id) epubReaders.delete(id);
+            card.remove();
+            if (row && row.children.length === 0) row.parentElement?.remove();
+            saveServer();
+        }
+
+        function insertEpubEmbedCard(payload) {
+            if (!payload || !payload.url) return;
+            const safeTitle = escapeHtml(payload.name || "book.epub");
+            const safeUrl = escapeHtml(payload.url);
+            const safeDownload = escapeHtml(payload.download_url || payload.url);
+            const block = `
+                <div class="epub-embed">
+                    <button class="epub-delete" onclick="deleteEpubCard(this)">✕</button>
+                    <div class="epub-toolbar">
+                        <span class="pdf-title">${safeTitle}</span>
+                        <div class="epub-tools">
+                            <button type="button" class="epub-nav-btn epub-prev">Prev</button>
+                            <span class="epub-status">Ready</span>
+                            <button type="button" class="epub-nav-btn epub-next">Next</button>
+                            <a class="pdf-download-link" href="${safeUrl}" target="_blank" rel="noopener">Open</a>
+                            <a class="pdf-download-link" href="${safeDownload}" download="${safeTitle}" target="_blank" rel="noopener">Download</a>
+                        </div>
+                    </div>
+                    <div class="epub-viewer" data-epub-url="${safeUrl}"></div>
+                </div>
+            `;
+            const row = getOrCreateEpubShelf();
+            row.insertAdjacentHTML("beforeend", block);
+            const card = row.lastElementChild;
+            initEpubReaderCard(card);
+            saveServer();
+        }
+
+        function uploadEpubFile(file) {
+            return new Promise(resolve => {
+                const isEpub = file && (file.type === "application/epub+zip" || /\.epub$/i.test(file.name || ""));
+                if (!isEpub) {
+                    resolve(false);
+                    return;
+                }
+                const formData = new FormData();
+                formData.append("epub", file);
+                const xhr = new XMLHttpRequest();
+                xhr.open("POST", "/upload_epub", true);
+                xhr.onload = function () {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        try {
+                            const data = JSON.parse(xhr.responseText);
+                            insertEpubEmbedCard(data);
                             resolve(true);
                             return;
                         } catch (e) { }
@@ -6480,6 +6812,23 @@ rememberActiveIndex();
             this.value = "";
         });
 
+        document.getElementById("epubInput").addEventListener("change", async function () {
+            const files = Array.from(this.files || []);
+            if (!files.length) {
+                this.value = "";
+                return;
+            }
+            status.textContent = `Uploading EPUB${files.length > 1 ? "s" : ""}...`;
+            for (const file of files) {
+                const ok = await uploadEpubFile(file);
+                if (!ok) {
+                    alert(`Failed to upload EPUB: ${file.name}`);
+                }
+            }
+            status.textContent = "Ready";
+            this.value = "";
+        });
+
         function setColor(color) {
             paper.focus(); // Ensure focus
             document.execCommand("foreColor", false, color);
@@ -6720,6 +7069,7 @@ rememberActiveIndex();
                                 docs[current] = data.content || "";
                                 article.innerHTML = docs[current];
                                 syncPdfShelfFromArticle();
+                                syncEpubShelfFromArticle();
                             }
                         } catch (e) {
                             article.innerHTML = "";
@@ -6727,6 +7077,7 @@ rememberActiveIndex();
                     } else if (current && docs[current] !== undefined) {
                         article.innerHTML = docs[current];
                         syncPdfShelfFromArticle();
+                        syncEpubShelfFromArticle();
                     }
 
                     renderTabs();
@@ -6908,6 +7259,7 @@ rememberActiveIndex();
         }
     </script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/epubjs/dist/epub.min.js"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
 
 </body>
