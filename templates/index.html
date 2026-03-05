@@ -4607,61 +4607,63 @@ body.dark-mode .music-subtext {
             (async () => {
                 try {
                 if (statusEl) statusEl.textContent = "Loading";
+                const response = await fetch(src, { cache: "no-store", credentials: "same-origin" });
+                if (!response.ok) throw new Error("epub fetch failed");
+                const buffer = await response.arrayBuffer();
+                const blobUrl = URL.createObjectURL(new Blob([buffer], { type: "application/epub+zip" }));
 
-                // Try URL first.
-                let book = null;
-                try {
-                    book = window.ePub(src);
-                } catch (_) { }
+                const strategies = [
+                    async () => window.ePub(blobUrl),
+                    async () => window.ePub(buffer),
+                    async () => window.ePub(new Uint8Array(buffer)),
+                    async () => {
+                        const b = window.ePub();
+                        await b.open(buffer, "binary");
+                        return b;
+                    }
+                ];
 
-                // Fallback to binary open (more reliable for Safari/iPad).
-                if (!book) {
-                    const response = await fetch(src, { cache: "no-store", credentials: "same-origin" });
-                    if (!response.ok) throw new Error("epub fetch failed");
-                    const buffer = await response.arrayBuffer();
-                    book = window.ePub();
-                    await book.open(buffer, "binary");
-                }
-                if (!book) throw new Error("epub init failed");
-
-                const rendition = book.renderTo(viewer, {
-                    width: "100%",
-                    height: "100%",
-                    flow: "paginated",
-                    spread: "none"
-                });
-                const state = { book, rendition, docName, epubName, prefs };
-                hydrateEpubToolbar(card, state);
-                if (statusEl) statusEl.textContent = "Rendering";
-                try {
-                    await Promise.race([
-                        rendition.display(savedPos || undefined),
-                        waitMs(9000)
-                    ]);
-                } catch (_) {
+                let state = null;
+                let lastErr = null;
+                for (const makeBook of strategies) {
                     try {
-                        await Promise.race([
-                            rendition.display(),
-                            waitMs(6000)
-                        ]);
-                    } catch (_) {
-                        // Last fallback: force first spine item
-                        const firstSpine = book?.spine?.get && book.spine.get(0);
-                        const firstHref = firstSpine?.href || firstSpine?.url || null;
-                        if (firstHref) {
+                        viewer.innerHTML = "";
+                        const book = await makeBook();
+                        if (!book) throw new Error("book init failed");
+                        const rendition = book.renderTo(viewer, {
+                            width: "100%",
+                            height: "100%",
+                            flow: "paginated",
+                            spread: "none"
+                        });
+                        if (statusEl) statusEl.textContent = "Rendering";
+                        try {
                             await Promise.race([
-                                rendition.display(firstHref),
-                                waitMs(6000)
+                                rendition.display(savedPos || undefined),
+                                waitMs(10000)
                             ]);
-                        } else {
-                            throw new Error("render timeout");
+                        } catch (_) {
+                            await Promise.race([
+                                rendition.display(),
+                                waitMs(7000)
+                            ]);
                         }
+                        state = { book, rendition, docName, epubName, prefs, blobUrl };
+                        break;
+                    } catch (e) {
+                        lastErr = e;
                     }
                 }
+                if (!state) {
+                    URL.revokeObjectURL(blobUrl);
+                    throw lastErr || new Error("epub init failed");
+                }
+
+                hydrateEpubToolbar(card, state);
                 applyEpubTheme(state);
                 if (statusEl) statusEl.textContent = "Loaded";
 
-                rendition.on("relocated", (loc) => {
+                state.rendition.on("relocated", (loc) => {
                     const shown = loc?.start?.displayed;
                     if (statusEl && shown && shown.total) {
                         statusEl.textContent = `${shown.page}/${shown.total}`;
@@ -4672,8 +4674,8 @@ body.dark-mode .music-subtext {
                     }
                 });
 
-                prevBtn?.addEventListener("click", () => rendition.prev());
-                nextBtn?.addEventListener("click", () => rendition.next());
+                prevBtn?.addEventListener("click", () => state.rendition.prev());
+                nextBtn?.addEventListener("click", () => state.rendition.next());
                 epubReaders.set(readerId, state);
             } catch (err) {
                 if (statusEl) statusEl.textContent = "Could not open";
@@ -4706,6 +4708,12 @@ body.dark-mode .music-subtext {
         }
 
         function syncEpubShelfFromArticle() {
+            epubReaders.forEach(reader => {
+                try { reader?.rendition?.destroy && reader.rendition.destroy(); } catch (_) { }
+                try { reader?.blobUrl && URL.revokeObjectURL(reader.blobUrl); } catch (_) { }
+            });
+            epubReaders.clear();
+
             const existingEpubShelves = document.querySelectorAll('.notepad > .epub-shelf-container');
             existingEpubShelves.forEach(c => c.remove());
             const existingEpubRows = document.querySelectorAll('.notepad > .epub-row');
@@ -4753,6 +4761,9 @@ body.dark-mode .music-subtext {
             const reader = id ? epubReaders.get(id) : null;
             if (reader?.rendition?.destroy) {
                 try { reader.rendition.destroy(); } catch (_) { }
+            }
+            if (reader?.blobUrl) {
+                try { URL.revokeObjectURL(reader.blobUrl); } catch (_) { }
             }
             if (id) epubReaders.delete(id);
             card.remove();
