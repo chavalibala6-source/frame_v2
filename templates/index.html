@@ -2648,21 +2648,61 @@ body.dark-mode .music-subtext {
             }
         }
 
+        .pdf-shelf-container {
+            width: 100%;
+            padding: 10px 0 18px 0;
+        }
+
+        .pdf-row {
+            display: flex;
+            gap: 14px;
+            overflow-x: auto;
+            overflow-y: visible;
+            padding: 0 var(--carousel-edge);
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .pdf-row::-webkit-scrollbar {
+            display: none;
+        }
+
         .pdf-embed {
-            margin: 18px 0;
+            position: relative;
+            margin: 0;
+            flex: 0 0 min(680px, 90vw);
             border: 1px solid rgba(0, 0, 0, 0.12);
             border-radius: 16px;
             overflow: hidden;
             background: rgba(255, 255, 255, 0.92);
             box-shadow: 0 10px 28px rgba(0, 0, 0, 0.14);
+            scroll-snap-align: center;
+            scroll-snap-stop: always;
+        }
+
+        .pdf-delete {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 3;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            background: rgba(0, 0, 0, 0.45);
+            color: #fff;
+            font-weight: 700;
+            line-height: 1;
+            cursor: pointer;
         }
 
         .pdf-toolbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 10px;
-            padding: 10px 14px;
+            gap: 12px;
+            padding: 10px 44px 10px 14px;
             border-bottom: 1px solid rgba(0, 0, 0, 0.1);
             background: rgba(248, 248, 250, 0.94);
         }
@@ -2693,6 +2733,11 @@ body.dark-mode .music-subtext {
         body.dark-mode .pdf-embed {
             border-color: rgba(255, 255, 255, 0.18);
             background: rgba(14, 18, 26, 0.9);
+        }
+
+        body.dark-mode .pdf-delete {
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(0, 0, 0, 0.55);
         }
 
         body.dark-mode .pdf-toolbar {
@@ -3102,6 +3147,7 @@ body.dark-mode .music-subtext {
                 const embeddedImageRow = article.querySelector('.image-row');
                 const embeddedRow = article.querySelector('.video-row');
                 const embeddedLocalRow = article.querySelector('.local-video-row');
+                const embeddedPdfRow = article.querySelector('.pdf-row');
 
                 // Cleanup: Remove ANY existing image/video rows/containers from notepad before placing new one
                 const existingCarousels = document.querySelectorAll('.notepad > .video-carousel-container');
@@ -3116,6 +3162,10 @@ body.dark-mode .music-subtext {
                 existingImageCarousels.forEach(c => c.remove());
                 const existingImageRows = document.querySelectorAll('.notepad > .image-row');
                 existingImageRows.forEach(r => r.remove());
+                const existingPdfShelves = document.querySelectorAll('.notepad > .pdf-shelf-container');
+                existingPdfShelves.forEach(c => c.remove());
+                const existingPdfRows = document.querySelectorAll('.notepad > .pdf-row');
+                existingPdfRows.forEach(r => r.remove());
 
                 if (embeddedImageRow) {
                     const notepad = document.querySelector('.notepad');
@@ -3352,6 +3402,20 @@ body.dark-mode .music-subtext {
                     refreshLocalVideoUI();
                 }
 
+                if (embeddedPdfRow) {
+                    const shelf = getOrCreatePdfShelf();
+                    shelf.appendChild(embeddedPdfRow);
+                    embeddedPdfRow.querySelectorAll('.pdf-embed').forEach(card => {
+                        if (!card.querySelector('.pdf-delete')) {
+                            const btn = document.createElement('button');
+                            btn.className = 'pdf-delete';
+                            btn.textContent = '✕';
+                            btn.onclick = () => deletePdfCard(btn);
+                            card.appendChild(btn);
+                        }
+                    });
+                }
+
                 // FIX: Legacy nesting (article inside article)
                 const nestedArticle = article.querySelector('.article');
                 if (nestedArticle) {
@@ -3530,6 +3594,7 @@ body.dark-mode .music-subtext {
             const videoRow = document.querySelector('.video-row');
             // 3. Get Local Video Row HTML if it exists
             const localVideoRow = document.querySelector('.local-video-row');
+            const pdfRow = document.querySelector('.pdf-row');
             let content = "";
             if (imageRow) {
                 content += imageRow.outerHTML;
@@ -3539,6 +3604,9 @@ body.dark-mode .music-subtext {
             }
             if (localVideoRow) {
                 content += localVideoRow.outerHTML;
+            }
+            if (pdfRow) {
+                content += pdfRow.outerHTML;
             }
             // 3. Get Article Content
             content += article.innerHTML;
@@ -3764,23 +3832,58 @@ body.dark-mode .music-subtext {
                 .replace(/'/g, "&#39;");
         }
 
+        function getOrCreatePdfShelf() {
+            const existing = document.querySelector('.pdf-row');
+            if (existing) return existing;
+
+            const notepad = document.querySelector('.notepad');
+            let container = document.querySelector('.pdf-shelf-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.className = 'pdf-shelf-container';
+            }
+
+            const row = document.createElement('div');
+            row.className = 'pdf-row';
+            container.appendChild(row);
+
+            const paperEl = document.getElementById('paper');
+            if (paperEl) {
+                notepad.insertBefore(container, paperEl);
+            } else {
+                notepad.insertBefore(container, notepad.firstChild);
+            }
+            return row;
+        }
+
+        function deletePdfCard(btn) {
+            if (!confirm("Delete this PDF block?")) return;
+            const card = btn?.closest('.pdf-embed');
+            const row = document.querySelector('.pdf-row');
+            if (card) card.remove();
+            if (row && row.children.length === 0) {
+                row.parentElement?.remove();
+            }
+            saveServer();
+        }
+
         function insertPdfEmbedCard(payload) {
             if (!payload || !payload.url) return;
             const safeTitle = escapeHtml(payload.name || "document.pdf");
             const safeUrl = escapeHtml(payload.url);
             const safeDownload = escapeHtml(payload.download_url || payload.url);
             const block = `
-                <div class="pdf-embed" contenteditable="false">
+                <div class="pdf-embed">
+                    <button class="pdf-delete" onclick="deletePdfCard(this)">✕</button>
                     <div class="pdf-toolbar">
                         <span class="pdf-title">${safeTitle}</span>
                         <a class="pdf-download-link" href="${safeDownload}" download="${safeTitle}" target="_blank" rel="noopener">Download PDF</a>
                     </div>
                     <iframe class="pdf-frame" src="${safeUrl}#view=FitH"></iframe>
                 </div>
-                <p><br></p>
             `;
-            article.focus();
-            document.execCommand("insertHTML", false, block);
+            const row = getOrCreatePdfShelf();
+            row.insertAdjacentHTML("beforeend", block);
             saveServer();
         }
 

@@ -2,7 +2,9 @@ pipeline {
     agent any
 
     environment {
-        IMAGE = "balu051989/frame-v2:latest"
+        IMAGE_REPO = "balu051989/frame-v2"
+        IMAGE_TAG = "${BUILD_NUMBER}"
+        IMAGE = "${IMAGE_REPO}:${IMAGE_TAG}"
     }
 
     stages {
@@ -35,7 +37,8 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                sh 'kubectl rollout restart deployment frame-v2'
+                sh 'kubectl set image deployment/frame-v2 frame-container=$IMAGE'
+                sh 'kubectl rollout status deployment/frame-v2'
             }
         }
     }
