@@ -6595,7 +6595,8 @@ rememberActiveIndex();
             completedFiles: 0,
             totalBytes: 0,
             completedBytes: 0,
-            inFlight: {}
+            inFlight: {},
+            modalUpdateQueued: false
         };
 
         function buildTrackFromPayload(payload) {
@@ -6686,6 +6687,15 @@ rememberActiveIndex();
             meta.textContent = `${musicUploadState.completedFiles}/${musicUploadState.totalFiles} files • ${formatBytes(uploaded)} / ${formatBytes(musicUploadState.totalBytes)} • ${pct}%`;
         }
 
+        function queueMusicUploadModalUpdate() {
+            if (musicUploadState.modalUpdateQueued) return;
+            musicUploadState.modalUpdateQueued = true;
+            requestAnimationFrame(() => {
+                musicUploadState.modalUpdateQueued = false;
+                updateMusicUploadModal();
+            });
+        }
+
         async function handleMusicUpload(event) {
             const files = Array.from(event.target?.files || []);
             if (!files.length) return;
@@ -6701,7 +6711,7 @@ rememberActiveIndex();
             updateMusicUploadModal();
             updateMusicStatusLabel(`Uploading ${files.length} track${files.length > 1 ? "s" : ""}...`);
 
-            const batchSize = 4;
+            const batchSize = 2;
             for (let i = 0; i < files.length; i += batchSize) {
                 const batch = files.slice(i, i + batchSize);
                 await Promise.all(batch.map((file, idx) => {
@@ -6709,20 +6719,23 @@ rememberActiveIndex();
                     return uploadMusicFile(file, {
                         onProgress: (loaded) => {
                             musicUploadState.inFlight[key] = loaded;
-                            updateMusicUploadModal();
+                            queueMusicUploadModalUpdate();
                         },
                         onComplete: () => {
                             musicUploadState.completedFiles += 1;
                             musicUploadState.completedBytes += Number(file.size) || 0;
                             delete musicUploadState.inFlight[key];
-                            updateMusicUploadModal();
+                            queueMusicUploadModalUpdate();
                         }
                     });
                 }));
+                // Yield between batches so playback/UI remains responsive.
+                await new Promise(resolve => setTimeout(resolve, 0));
             }
 
             musicState.uploading = false;
             updateMusicUploadModal();
+            lucide.createIcons();
             setTimeout(() => {
                 hideMusicUploadModal();
             }, 900);
@@ -6743,7 +6756,7 @@ rememberActiveIndex();
                     if (xhr.status >= 200 && xhr.status < 300) {
                         try {
                             const payload = JSON.parse(xhr.responseText);
-                            addMusicTrack(payload);
+                            addMusicTrack(payload, { autoplay: false });
                         } catch (e) {
                             updateMusicStatusLabel("Upload failed");
                         }
@@ -6768,9 +6781,26 @@ rememberActiveIndex();
             if (!info || !info.url) return;
             const track = buildTrackFromPayload(info);
             musicState.tracks.push(track);
-            renderMusicTracks();
+            appendMusicTrack(track);
             if (options.autoplay !== false && !musicState.currentId) {
                 playMusicTrack(track);
+            }
+        }
+
+        function appendMusicTrack(track) {
+            const row = document.getElementById("musicRow");
+            if (!row) {
+                renderMusicTracks();
+                return;
+            }
+            row.appendChild(createMusicCard(track));
+            updateMusicSectionStatus();
+            updateMusicGlobalIndicator();
+            ensureMusicSectionVisibility();
+            applyMusicRowSelectMode();
+            // Avoid expensive full icon redraw on every single upload tick.
+            if (!musicState.uploading) {
+                lucide.createIcons();
             }
         }
 
