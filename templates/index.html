@@ -1644,6 +1644,8 @@ body.dark-mode .music-subtext {
             scroll-snap-type: x mandatory;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
+            touch-action: pan-x;
+            overscroll-behavior-x: contain;
         }
 
         .image-row::-webkit-scrollbar {
@@ -2662,6 +2664,8 @@ body.dark-mode .music-subtext {
             scroll-snap-type: x mandatory;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
+            touch-action: pan-x;
+            overscroll-behavior-x: contain;
         }
 
         .pdf-row::-webkit-scrollbar {
@@ -2671,9 +2675,9 @@ body.dark-mode .music-subtext {
         .pdf-embed {
             position: relative;
             margin: 0;
-            flex: 0 0 calc(100% - 40px);
-            width: calc(100% - 40px);
-            max-width: calc(100% - 40px);
+            flex: 0 0 100%;
+            width: 100%;
+            max-width: 100%;
             border: 1px solid rgba(0, 0, 0, 0.12);
             border-radius: 16px;
             overflow: hidden;
