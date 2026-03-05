@@ -2731,7 +2731,8 @@ body.dark-mode .music-subtext {
 
         .pdf-frame {
             width: 100%;
-            min-height: 500px;
+            height: clamp(360px, 56.25vw, 720px);
+            min-height: 360px;
             border: 0;
             background: #fff;
         }
@@ -2758,7 +2759,8 @@ body.dark-mode .music-subtext {
 
         @media (max-width: 768px) {
             .pdf-frame {
-                min-height: 360px;
+                height: clamp(320px, 70vw, 480px);
+                min-height: 320px;
             }
 
         }
