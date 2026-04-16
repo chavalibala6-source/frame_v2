@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
       - name: frame-container
-        image: balu051989/frame_v2-web:latest
-        imagePullPolicy: Always
+        image: balu051989/frame_v2-web:v3
+        imagePullPolicy: Never
         ports:
         - containerPort: 5000
         resources:
