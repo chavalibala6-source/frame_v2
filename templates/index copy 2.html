@@ -972,8 +972,6 @@
             display: flex;
             flex-direction: column;
             gap: 4px;
-            min-width: 0;
-            width: 100%;
         }
 
         .music-title {
@@ -982,11 +980,21 @@
             letter-spacing: 0.01em;
             color: #111;
             line-height: 1.3;
-            
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            width: 100%;
+
+            max-height: 50px;
+            /* set height */
+            overflow-y: auto;
+            /* enables vertical scroll */
+            /* Hide scrollbar - Chrome, Safari */
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE/Edge */
+        }
+
+        .music-title::-webkit-scrollbar {
+            display: none;
+            /* Chrome, Safari */
         }
 
         .music-size {
@@ -3271,13 +3279,14 @@
             </div>
             <input type="file" id="musicUploadInput" accept="audio/*" multiple style="display:none;">
             <div id="globalMusicPlayer" class="global-music-player">
-                <div class="gmp-drag-handle" id="gmpDragHandle"></div>
                 <audio id="globalAudioPlayer" preload="none"></audio>
                 <div class="gmp-side-controls">
                     <button class="gmp-mini-btn" id="gmpShuffleBtn" aria-label="Shuffle"><i
                             data-lucide="shuffle"></i></button>
                     <button class="gmp-mini-btn" id="gmpRepeatBtn" aria-label="Repeat"><i
                             data-lucide="repeat"></i></button>
+                    <button class="gmp-mini-btn" id="gmpQueueBtn" aria-label="Queue"><i
+                            data-lucide="list-music"></i></button>
                 </div>
                 <div class="gmp-transport">
                     <div class="gmp-controls">
@@ -3292,7 +3301,7 @@
                         <div class="gmp-vol-slider" id="gmpVolSlider">
                             <div class="gmp-vol-fill" id="gmpVolFill"></div>
                         </div>
-                        <i class="gmp-vol-icon gmp-volume-right" data-lucide="volume-2"></i>
+                        <span class="gmp-volume-right">)))</span>
                         <span class="gmp-volume-note" id="gmpVolumeNote">Use phone buttons</span>
                     </div>
                 </div>
@@ -3307,8 +3316,9 @@
                             <div class="gmp-artist" id="gmpArtist">Unknown Artist</div>
                         </div>
                         <div class="gmp-display-meta">
-                            <button class="gmp-mini-btn" id="gmpFullScreenBtn" aria-label="Full Screen"><i
-                                    data-lucide="maximize"></i></button>
+                            <span>✤</span>
+                            <button class="gmp-mini-btn" id="gmpQueueMiniBtn" aria-label="Queue"><i
+                                    data-lucide="list-music"></i></button>
                         </div>
                     </div>
                     <div class="gmp-progress-container">
@@ -6925,15 +6935,19 @@
                 </div>
                 <button class="music-play-btn">
                     <i data-lucide="play"></i>
+                    <span>Play</span>
                 </button>
                 <div class="music-actions">
-                    <button class="music-download-btn" title="Download">
+                    <button class="music-download-btn">
                         <i data-lucide="download"></i>
+                        Download
                     </button>
-                    <button class="music-delete-btn" title="Delete">
+                    <button class="music-delete-btn">
                         <i data-lucide="trash-2"></i>
+                        Delete
                     </button>
                 </div>
+                <div class="music-download-status">${track.status}</div>
             `;
             const checkbox = card.querySelector("input[type=checkbox]");
             const playBtn = card.querySelector(".music-play-btn");
@@ -6993,16 +7007,9 @@
             musicState.tracks.forEach(t => t.card?.classList.remove("is-playing"));
             track.card?.classList.add("is-playing");
 
-            // Scroll the music list horizontally to the active card without forcing vertical page scroll
+            // Scroll to the active music card automatically
             if (track.card) {
-                const container = track.card.parentElement;
-                if (container) {
-                    const scrollTarget = track.card.offsetLeft - (container.clientWidth / 2) + (track.card.clientWidth / 2);
-                    container.scrollTo({
-                        left: scrollTarget,
-                        behavior: 'smooth'
-                    });
-                }
+                track.card.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
 
             updateMusicButtons();
@@ -8228,319 +8235,6 @@
         .music-card {
             padding-bottom: 24px;
         }
-
-        /* Full Screen Music Player */
-        .global-music-player.is-fullscreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            width: 100vw;
-            height: 100vh;
-            margin: 0;
-            border-radius: 0;
-            z-index: 100000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            background: linear-gradient(180deg, #6c735d 0%, #3e4433 100%);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            padding: 40px 24px 60px 24px;
-            transform: none !important;
-            box-shadow: none;
-            overflow-y: auto;
-        }
-
-        body.dark-mode .global-music-player.is-fullscreen {
-            background: linear-gradient(180deg, #3e4433 0%, #1c1e14 100%);
-        }
-
-        .gmp-drag-handle {
-            display: none;
-        }
-
-        .global-music-player.is-fullscreen .gmp-drag-handle {
-            display: block;
-            position: absolute;
-            top: 12px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80px;
-            height: 32px;
-            cursor: pointer;
-            z-index: 10;
-        }
-
-        .global-music-player.is-fullscreen .gmp-drag-handle::after {
-            content: "";
-            position: absolute;
-            top: 4px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 40px;
-            height: 5px;
-            background: rgba(255, 255, 255, 0.4);
-            border-radius: 4px;
-            pointer-events: none;
-        }
-
-        .global-music-player.is-fullscreen .gmp-display {
-            order: 1;
-            flex: unset;
-            max-width: 400px;
-            width: 100%;
-            height: auto;
-            min-height: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            background: transparent;
-            border: none;
-            box-shadow: none;
-            padding: 0;
-            margin-bottom: 20px;
-        }
-
-        .global-music-player.is-fullscreen .gmp-display-top {
-            flex-direction: column;
-            width: 100%;
-            margin-bottom: 12px;
-            position: relative;
-        }
-
-        .global-music-player.is-fullscreen .gmp-thumbnail {
-            position: relative;
-            transform: none;
-            left: auto;
-            top: auto;
-            width: 100%;
-            aspect-ratio: 1 / 1;
-            height: auto;
-            border-radius: 12px;
-            margin-top: 40px;
-            margin-bottom: 40px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            background: #d4d9b4;
-            border: none;
-        }
-
-        body.dark-mode .global-music-player.is-fullscreen .gmp-thumbnail {
-            background: #e4e9b8;
-        }
-
-        .global-music-player.is-fullscreen .gmp-thumbnail svg {
-            width: 100px;
-            height: 100px;
-            opacity: 0.8;
-            color: #606842;
-        }
-
-        .global-music-player.is-fullscreen .gmp-info {
-            padding: 0;
-            margin-bottom: 0;
-            width: 100%;
-            text-align: left;
-        }
-
-        .global-music-player.is-fullscreen .gmp-title {
-            font-size: 24px;
-            white-space: normal;
-            font-weight: 700;
-            color: #fff;
-            padding-right: 40px;
-            /* space for right button */
-            line-height: 1.25;
-        }
-
-        .global-music-player.is-fullscreen .gmp-artist {
-            font-size: 18px;
-            margin-top: 4px;
-            color: rgba(255, 255, 255, 0.7);
-            font-weight: 500;
-        }
-
-        /* Shift the meta strictly to the right of the title */
-        .global-music-player.is-fullscreen .gmp-display-meta {
-            position: absolute;
-            bottom: 6px;
-            right: 0;
-            top: auto;
-            gap: 10px;
-        }
-
-        /* Hide the full screen entry point (and meta bar) while inside full screen */
-        .global-music-player.is-fullscreen .gmp-display-meta {
-            display: none !important;
-        }
-
-        /* Restyled full-screen button for the global player (mini mode) */
-        #gmpFullScreenBtn {
-            background: rgba(126, 131, 106, 0.2);
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: none;
-            box-shadow: none;
-        }
-
-        body.dark-mode #gmpFullScreenBtn {
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        #gmpFullScreenBtn svg {
-            width: 18px;
-            height: 18px;
-            stroke-width: 2.5;
-            color: rgb(145, 62, 222);
-            /* adapts to dark mode text color */
-        }
-
-
-        .global-music-player.is-fullscreen .gmp-display-meta .gmp-mini-btn svg {
-            width: 18px;
-            height: 18px;
-            stroke-width: 2.5;
-            color: white !important;
-        }
-
-        .global-music-player.is-fullscreen .gmp-progress-container {
-            width: 100%;
-            max-width: 400px;
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.6) !important;
-            flex-wrap: wrap;
-            margin-top: 20px;
-        }
-
-        .global-music-player.is-fullscreen .gmp-progress-bar {
-            width: 100%;
-            flex: 0 0 100%;
-            order: 1;
-            margin-bottom: 8px;
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            height: 6px;
-        }
-
-        .global-music-player.is-fullscreen .gmp-progress-fill {
-            background: rgba(255, 255, 255, 0.8);
-        }
-
-        .global-music-player.is-fullscreen #gmpCurrentTime {
-            order: 2;
-            flex: 1;
-            text-align: left;
-        }
-
-        .global-music-player.is-fullscreen #gmpTotalTime {
-            order: 3;
-            flex: 1;
-            text-align: right;
-        }
-
-        .global-music-player.is-fullscreen .gmp-transport {
-            order: 2;
-            width: 100%;
-            max-width: 400px;
-            margin-top: 24px;
-            gap: 30px;
-        }
-
-        .global-music-player.is-fullscreen .gmp-controls {
-            gap: 40px;
-        }
-
-        .global-music-player.is-fullscreen .gmp-btn {
-            background: transparent;
-            border: none;
-            box-shadow: none;
-            color: #fff;
-            width: 50px;
-            height: 50px;
-        }
-
-        .global-music-player.is-fullscreen .gmp-btn svg {
-            width: 36px;
-            height: 36px;
-            fill: #fff;
-        }
-
-        .global-music-player.is-fullscreen .gmp-btn-main {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 50%;
-            width: 70px;
-            height: 70px;
-        }
-
-        .global-music-player.is-fullscreen .gmp-btn-main .gmp-main-symbol {
-            color: #fff;
-            font-size: 32px;
-        }
-
-        .global-music-player.is-fullscreen .gmp-lower {
-            margin-top: 30px;
-            width: 100%;
-            max-width: 400px;
-            gap: 12px;
-        }
-
-        .global-music-player.is-fullscreen .gmp-vol-icon,
-        .global-music-player.is-fullscreen .gmp-volume-right {
-            color: rgba(255, 255, 255, 0.8);
-        }
-
-        .global-music-player.is-fullscreen .gmp-vol-slider {
-            flex: 1;
-            width: auto;
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            height: 6px;
-        }
-
-        .global-music-player.is-fullscreen .gmp-vol-fill {
-            background: rgba(255, 255, 255, 0.8);
-        }
-
-        .global-music-player.is-fullscreen .gmp-side-controls {
-            order: 3;
-            flex-direction: row;
-            justify-content: space-evenly;
-            width: 100%;
-            max-width: 400px;
-            margin-top: 40px;
-            gap: 0;
-            display: flex !important;
-        }
-
-        .global-music-player.is-fullscreen .gmp-side-controls .gmp-mini-btn {
-            background: transparent;
-            border: none;
-            box-shadow: none;
-            color: rgba(255, 255, 255, 0.7);
-            width: 40px;
-            height: 40px;
-        }
-
-        .global-music-player.is-fullscreen .gmp-side-controls .gmp-mini-btn svg {
-            width: 24px;
-            height: 24px;
-            color: rgba(255, 255, 255, 0.7) !important;
-        }
-
-        .global-music-player.is-fullscreen .gmp-side-controls .gmp-mini-btn.active svg {
-            color: #fff !important;
-        }
-
-        .global-music-player.is-fullscreen .gmp-volume-note {
-            display: none !important;
-        }
     </style>
 
     <script>
@@ -8553,10 +8247,10 @@
 
         window.gmpAudio = document.getElementById('globalAudioPlayer');
         const gmpEl = document.getElementById('globalMusicPlayer');
-        const gmpDragHandle = document.getElementById('gmpDragHandle');
         const gmpTitle = document.getElementById('gmpTitle');
         const gmpArtist = document.getElementById('gmpArtist');
-        const gmpFullScreenBtn = document.getElementById('gmpFullScreenBtn');
+        const gmpQueueBtn = document.getElementById('gmpQueueBtn');
+        const gmpQueueMiniBtn = document.getElementById('gmpQueueMiniBtn');
         const gmpPlayBtn = document.getElementById('gmpPlayBtn');
         const gmpPrevBtn = document.getElementById('gmpPrevBtn');
         const gmpNextBtn = document.getElementById('gmpNextBtn');
@@ -8923,53 +8617,10 @@
             lucide.createIcons();
         });
 
-        gmpFullScreenBtn?.addEventListener('click', () => {
-            gmpEl.classList.toggle('is-fullscreen');
-
-            if (gmpEl.classList.contains('is-fullscreen')) {
-                document.body.style.overflow = 'hidden';
-            } else {
-                document.body.style.overflow = '';
-            }
-            lucide.createIcons();
-        });
-
-        const closeFullScreen = () => {
-            if (gmpEl.classList.contains('is-fullscreen')) {
-                gmpEl.classList.remove('is-fullscreen');
-                document.body.style.overflow = '';
-                lucide.createIcons();
-            }
-        };
-
-        gmpDragHandle?.addEventListener('click', closeFullScreen);
-
-        // Swipe down to dismiss
-        let gmpTouchStartY = 0;
-        let gmpTouchEndY = 0;
-
-        gmpEl.addEventListener('touchstart', (e) => {
-            if (!gmpEl.classList.contains('is-fullscreen')) return;
-            gmpTouchStartY = e.touches[0].clientY;
-            gmpTouchEndY = 0;
-        }, { passive: true });
-
-        gmpEl.addEventListener('touchmove', (e) => {
-            if (!gmpEl.classList.contains('is-fullscreen')) return;
-            gmpTouchEndY = e.touches[0].clientY;
-        }, { passive: true });
-
-        gmpEl.addEventListener('touchend', () => {
-            if (!gmpEl.classList.contains('is-fullscreen')) return;
-            if (gmpTouchEndY !== 0) {
-                const swipeDistance = gmpTouchEndY - gmpTouchStartY;
-                // If dragged downwards more than 50px, dismiss
-                if (swipeDistance > 50) {
-                    closeFullScreen();
-                }
-            }
-            gmpTouchStartY = 0;
-            gmpTouchEndY = 0;
+        [gmpQueueBtn, gmpQueueMiniBtn].forEach((btn) => {
+            btn?.addEventListener('click', () => {
+                document.getElementById('musicSection')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
         });
 
         function playNextGlobalMusic() {
