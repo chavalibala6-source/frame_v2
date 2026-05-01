@@ -3443,9 +3443,9 @@ body.light-mode {
                 <button id="musicDownloadSelectedBtn" title="Download Selected"><i data-lucide="download"></i></button>
                 <button id="musicDownloadAllBtn" title="Download All"><i data-lucide="download-cloud"></i></button>
             </div>
-            <input type="file" id="musicUploadInput" accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.flac,.opus,.mp4,
+            <input type="file" id="musicUploadInput" accept="audio/* ,.mp3,.m4a,.aac,.wav,.ogg,.flac,.opus,.mp4,
         audio/mpeg,audio/mp3,audio/mp4,audio/x-m4a,audio/aac,
-        audio/wav,audio/ogg,audio/flac,audio/opus"" multiple style="display:none;">
+        audio/wav,audio/ogg,audio/flac,audio/opus" multiple style="display:none;">
             <div id="globalMusicPlayer" class="global-music-player">
                 <div class="gmp-drag-handle" id="gmpDragHandle"></div>
                 <audio id="globalAudioPlayer" preload="none"></audio>
@@ -8969,7 +8969,7 @@ body.light-mode .global-music-player.is-fullscreen {
 
         function isIPhoneVolumeRestricted() {
             const ua = navigator.userAgent || '';
-            return /iPhone|iPod/i.test(ua) && !/iPad/i.test(ua);
+            return /iPhone|iPod/i.test(ua);
         }
 
         function renderGmpPlayButton(isPaused) {
@@ -9159,9 +9159,8 @@ body.light-mode .global-music-player.is-fullscreen {
         function bindVolumeSliderScrubbing() {
             if (!gmpVolSlider) return;
             if (isIPhoneVolumeRestricted()) {
-                // Hide the entire volume row — iOS blocks web volume control
-                const lowerRow = gmpVolSlider.closest('.gmp-lower');
-                if (lowerRow) lowerRow.style.display = 'none';
+                gmpVolSlider.classList.add('is-disabled');
+                gmpVolumeNote?.classList.add('show');
                 return;
             }
 
